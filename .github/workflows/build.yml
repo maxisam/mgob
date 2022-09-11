@@ -29,7 +29,7 @@ jobs:
       - name: Execute mongosh commands
         uses: krassdanke/mongosh-command-action@v1.1
         with:
-          connectionString: "mongodb://localhost:27017/test&ssl=false"
+          connectionString: "mongodb://0.0.0.0:27017/test&ssl=false"
           snippet: "db.test.insertOne({item: 'item', val: 'test'});"
       - name: setup minio
         run: |
@@ -62,7 +62,7 @@ jobs:
             EN_AWS_CLI=false
             EN_AZURE=false
             EN_GCLOUD=false
-            EN_MINIO=false
+            EN_MINIO=true
             EN_RCLONE=false
             EN_GPG=false
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
@@ -72,26 +72,26 @@ jobs:
 
       - name: run docker image
         run: |
-          sudo docker run -d --name mgob -p 8090:8090 -v ${{ github.workspace }}/test/travis:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          sudo docker run -d --name mgob -p 8090:8090 -v ${{ github.workspace }}/test/gh-actions:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           sleep 90
+          sudo docker logs mgob
           curl http://127.0.0.1:8090/version
-      # - uses: addnab/docker-run-action@v3
-      #   with:
-      #     image: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-      #     options: >
-      #       --name mgob-${{ env.APP_VERSION }}
-      #       --restart unless-stopped
-      #       -v ${{ github.workspace }}/test/travis:/config
-      #       -p 127.0.0.1:8090:8090
-      #     run: |
-      #       sleep 90
-      #       curl http://127.0.0.1:8090/version
+          echo 'S3 integration test'
+          sudo docker logs mgob 2>&1 | grep 'S3 upload finished'
 
-      - uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v3
         with:
           build-args: |
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
+            EN_AWS_CLI=false
+            EN_AZURE=false
+            EN_GCLOUD=false
+            EN_MINIO=true
+            EN_RCLONE=false
+            EN_GPG=false
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
