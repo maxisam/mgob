@@ -26,11 +26,12 @@ jobs:
           MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
     steps:
-      - name: Execute mongosh commands
-        uses: krassdanke/mongosh-command-action@v1.1
-        with:
-          connectionString: "mongodb://0.0.0.0:27017/test&ssl=false"
-          snippet: "db.test.insertOne({item: 'item', val: 'test'});"
+      - uses: actions/checkout@v3
+
+      - name: Setup MongoDB
+        run: yarn && node client.js
+        working-directory: ./test/setup
+
       - name: setup minio
         run: |
           sleep 10
@@ -38,8 +39,6 @@ jobs:
           sudo chmod u+x /usr/bin/mc
           sudo mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
           sudo mc mb local/backup
-
-      - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
