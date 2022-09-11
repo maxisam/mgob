@@ -64,19 +64,22 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
 
-      - uses: addnab/docker-run-action@v3
-        with:
-          image: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          options: >
-            --name mgob-${{ env.APP_VERSION }}
-            --restart unless-stopped 
-            -v ${{ github.workspace }}/test/travis:/config
-            -p 127.0.0.1:8090:8090
-          run: |
-            sleep 90
-            docker logs mgob-${{ env.APP_VERSION }}
-            curl http://127.0.0.1:8090/version
-            docker logs mgob-${{ env.APP_VERSION }} 2>&1 | grep 'S3 upload finished'
+      - name: run docker image
+        run: |
+          sudo docker run -d --name mgob -p 8090:8090 -v ${{ github.workspace }}/test/travis:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          sleep 90
+          curl http://127.0.0.1:8090/version
+      # - uses: addnab/docker-run-action@v3
+      #   with:
+      #     image: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+      #     options: >
+      #       --name mgob-${{ env.APP_VERSION }}
+      #       --restart unless-stopped
+      #       -v ${{ github.workspace }}/test/travis:/config
+      #       -p 127.0.0.1:8090:8090
+      #     run: |
+      #       sleep 90
+      #       curl http://127.0.0.1:8090/version
 
       - uses: docker/build-push-action@v2
         with:
