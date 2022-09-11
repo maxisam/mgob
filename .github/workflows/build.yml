@@ -59,6 +59,12 @@ jobs:
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
+            EN_AWS_CLI=false
+            EN_AZURE=false
+            EN_GCLOUD=false
+            EN_MINIO=false
+            EN_RCLONE=false
+            EN_GPG=false
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
