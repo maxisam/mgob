@@ -3,7 +3,7 @@ scheduler:
   retention: 5
   timeout: 60
 target:
-  host: "127.0.0.1"
+  host: "localhost"
   port: 27017
   database: test
 s3:
