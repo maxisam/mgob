@@ -1,4 +1,4 @@
-name: Build
+name: Dev Build
 
 on:
   push:
@@ -7,10 +7,12 @@ on:
     branches: ["master"]
 
 jobs:
-  test:
+  test-build:
     runs-on: ubuntu-latest
     env:
       APP_VERSION: 1.5
+      MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
+      MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     services:
       mongodb:
         image: mongo:4.2.8
@@ -22,8 +24,8 @@ jobs:
           - 9000:9000
           - 9001:9001
         env:
-          MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
-          MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+          MINIO_ROOT_USER: ${{ env.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD: ${{ env.MINIO_ROOT_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3
@@ -32,12 +34,12 @@ jobs:
         run: yarn && node client.js
         working-directory: ./test/setup
 
-      - name: setup minio
+      - name: Setup minio
         run: |
           sleep 10
           sudo curl -s -o /usr/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc
           sudo chmod u+x /usr/bin/mc
-          sudo mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
+          sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
 
       - name: Set up Docker Buildx
@@ -52,7 +54,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: docker/build-push-action@v3
+      - name: Build Mgob image
+        uses: docker/build-push-action@v3
         with:
           build-args: |
             BUILD_DATE=${{ env.NOW }}
@@ -65,20 +68,31 @@ jobs:
             EN_RCLONE=false
             EN_GPG=false
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          push: true
+          push: false
+          load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
 
-      - name: run docker image
+      - name: Run Mgob image
+        run: >
+          docker run -d 
+          --name mgob 
+          --network "host" 
+          -v ${{ github.workspace }}/test/gh-actions:/config 
+          ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+
+      - name: Verify mgob backup
         run: |
-          sudo docker run -d --name mgob --network "host" -p 8090:8090 -v ${{ github.workspace }}/test/gh-actions:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           sleep 90
-          sudo docker logs mgob
+          docker logs mgob
           curl http://127.0.0.1:8090/version
           echo 'S3 integration test'
-          sudo docker logs mgob 2>&1 | grep 'S3 upload finished'
+          docker logs mgob 2>&1 | grep 'S3 upload finished'
+          echo 'Local backup integration test'
+          docker logs mgob 2>&1 | grep 'Backup finished'
 
-      - uses: docker/build-push-action@v3
+      - name: Push mgob image
+        uses: docker/build-push-action@v3
         with:
           build-args: |
             BUILD_DATE=${{ env.NOW }}
