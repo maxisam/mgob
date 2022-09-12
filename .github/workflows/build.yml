@@ -71,7 +71,7 @@ jobs:
 
       - name: run docker image
         run: |
-          sudo docker run -d --name mgob --network ${{ job.container.network }} -p 8090:8090 -v ${{ github.workspace }}/test/gh-actions:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          sudo docker run -d --name mgob --network "host" -p 8090:8090 -v ${{ github.workspace }}/test/gh-actions:/config ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           sleep 90
           sudo docker logs mgob
           curl http://127.0.0.1:8090/version
