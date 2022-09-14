@@ -19,7 +19,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 	t1 := time.Now()
 	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
-	archive, mlog, err := dump(plan, tmpPath, t1.UTC())
+	archive, mlog, err := dump(plan, tmpPath, t1.UTC(), 0)
 	log.WithFields(log.Fields{
 		"archive": archive,
 		"mlog":    mlog,
