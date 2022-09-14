@@ -2,6 +2,7 @@ package backup
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -37,4 +38,18 @@ func Test_buildDumpCmd_uri(t *testing.T) {
 
 	dumpCmd := buildDumpCmd("test.gz", plan)
 	assert.Equal(t, dumpCmd, `mongodump --archive=test.gz --gzip --uri "mongodb://user:password@localhost:27017" --db test --authenticationDatabase admin`)
+}
+
+func Test_runDump(t *testing.T) {
+	cmd := `mongodump --archive=test.gz --gzip --uri "mongodb://user:password@localhost:27017" --db test --authenticationDatabase admin`
+	retryPlan := config.Retry{
+		Attempts:      3,
+		BackoffFactor: 0,
+	}
+	archive := "test.gz"
+	retryAttempt := 0.0
+	timeout := time.Duration(1) * time.Second
+	_, retryCount, err := runDump(cmd, retryPlan, archive, retryAttempt, timeout)
+	assert.Error(t, err)
+	assert.Equal(t, retryPlan.Attempts, int(retryCount))
 }

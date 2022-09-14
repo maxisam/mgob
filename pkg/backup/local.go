@@ -15,34 +15,43 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func dump(plan config.Plan, tmpPath string, ts time.Time, attempt float64) (string, string, error) {
-	retryCount := attempt
+func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
+	retryCount := 0.0
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
 	dumpCmd := buildDumpCmd(archive, plan)
+	timeout := time.Duration(plan.Scheduler.Timeout) * time.Minute
 
 	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
-	output, err := sh.Command("/bin/sh", "-c", dumpCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
+	output, retryCount, err := runDump(dumpCmd, plan.Retry, archive, retryCount, timeout)
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
 			ex = strings.Replace(string(output), "\n", " ", -1)
 		}
-		// Try and clean up tmp file after an error
-		os.Remove(archive)
-		retryCount++
-		if retryCount <= float64(plan.Retry.Attempts) {
-			time.Sleep(time.Duration(plan.Retry.BackoffFactor * float32(math.Pow(2, retryCount)) * float32(time.Second)))
-			log.Debugf("retrying dump: %v", retryCount)
-			return dump(plan, tmpPath, ts, retryCount)
-		} else {
-
-			return "", "", errors.Wrapf(err, "mongodump log %v", ex)
-		}
+		return "", "", errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
 	}
 	logToFile(mlog, output)
 
 	return archive, mlog, nil
+}
+
+func runDump(dumpCmd string, retryPlan config.Retry, archive string, retryAttempt float64, timeout time.Duration) ([]byte, float64, error) {
+	duration := float32(0)
+	output, err := sh.Command("/bin/sh", "-c", dumpCmd).SetTimeout(timeout).CombinedOutput()
+	if err != nil {
+		// Try and clean up tmp file after an error
+		os.Remove(archive)
+		retryAttempt++
+		if retryAttempt > float64(retryPlan.Attempts) {
+			return nil, retryAttempt - 1, err
+		}
+		duration = retryPlan.BackoffFactor * float32(math.Pow(2, retryAttempt)) * float32(time.Second)
+		time.Sleep(time.Duration(duration))
+		log.Debugf("retrying dump: %v after %v second", retryAttempt, duration)
+		return runDump(dumpCmd, retryPlan, archive, retryAttempt, timeout)
+	}
+	return output, retryAttempt, nil
 }
 
 func buildDumpCmd(archive string, plan config.Plan) string {
