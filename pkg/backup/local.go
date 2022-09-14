@@ -19,15 +19,42 @@ func dump(plan config.Plan, tmpPath string, ts time.Time, attempt float64) (stri
 	retryCount := attempt
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
-	dumpCmd := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
+	dumpCmd := buildDumpCmd(archive, plan)
 
+	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
+	output, err := sh.Command("/bin/sh", "-c", dumpCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
+	if err != nil {
+		ex := ""
+		if len(output) > 0 {
+			ex = strings.Replace(string(output), "\n", " ", -1)
+		}
+		// Try and clean up tmp file after an error
+		os.Remove(archive)
+		retryCount++
+		if retryCount <= float64(plan.Retry.Attempts) {
+			time.Sleep(time.Duration(plan.Retry.BackoffFactor * float32(math.Pow(2, retryCount)) * float32(time.Second)))
+			log.Debugf("retrying dump: %v", retryCount)
+			return dump(plan, tmpPath, ts, retryCount)
+		} else {
+
+			return "", "", errors.Wrapf(err, "mongodump log %v", ex)
+		}
+	}
+	logToFile(mlog, output)
+
+	return archive, mlog, nil
+}
+
+func buildDumpCmd(archive string, plan config.Plan) string {
+	dumpCmd := fmt.Sprintf("mongodump --archive=%v --gzip ", archive)
+	// using uri (New in version 3.4.6)
+	// host/port/username/password are incompatible with uri
+	// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
+	// use older host/port
 	if plan.Target.Uri != "" {
-		// using uri (New in version 3.4.6)
-		// host/port/username/password are incompatible with uri
-		// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
 		dumpCmd += fmt.Sprintf(`--uri "%v" `, plan.Target.Uri)
 	} else {
-		// use older host/port
+
 		dumpCmd += fmt.Sprintf("--host %v --port %v ", plan.Target.Host, plan.Target.Port)
 
 		if plan.Target.Username != "" && plan.Target.Password != "" {
@@ -42,29 +69,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time, attempt float64) (stri
 	if plan.Target.Params != "" {
 		dumpCmd += fmt.Sprintf("%v", plan.Target.Params)
 	}
-
-	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
-	output, err := sh.Command("/bin/sh", "-c", dumpCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
-	if err != nil {
-		ex := ""
-		if len(output) > 0 {
-			ex = strings.Replace(string(output), "\n", " ", -1)
-		}
-		// Try and clean up tmp file after an error
-		os.Remove(archive)
-		retryCount++
-		time.Sleep(time.Duration(plan.Retry.BackoffFactor * float32(math.Pow(2, retryCount)) * float32(time.Second)))
-		if retryCount <= float64(plan.Retry.Attempts) {
-			log.Debugf("retrying dump: %v", retryCount)
-			return dump(plan, tmpPath, ts, retryCount)
-		} else {
-
-			return "", "", errors.Wrapf(err, "mongodump log %v", ex)
-		}
-	}
-	logToFile(mlog, output)
-
-	return archive, mlog, nil
+	return dumpCmd
 }
 
 func logToFile(file string, data []byte) error {
