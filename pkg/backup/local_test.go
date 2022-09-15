@@ -23,7 +23,7 @@ func Test_runDump(t *testing.T) {
 	assert.Equal(t, retryPlan.Attempts, int(retryCount))
 }
 
-func Test_getDumpedDocCount(t *testing.T) {
+func Test_getDumpedDocMap(t *testing.T) {
 	dumpOutput := []byte(`2022-09-12T23:00:00.102+0000	writing DBCollection.Contents_Published to archive '/tmp/content-1663023600.gz'
 	2022-09-12T23:00:00.102+0000	writing DBCollection.Contents_Count to archive '/tmp/content-1663023600.gz'
 	2022-09-12T23:00:00.102+0000	writing DBCollection.Contents_Published_Count to archive '/tmp/content-1663023600.gz'

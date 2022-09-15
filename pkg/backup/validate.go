@@ -33,12 +33,10 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get collection names")
 	}
-	_, err = checkRetoreDatabase(backupResult, collectionNames, output)
-	if err != nil {
+	if err = checkRetoreDatabase(backupResult, collectionNames); err != nil {
 		return false, errors.Wrapf(err, "failed to run validation check against restore database")
 	}
-	err = cleanMongo(plan.Validation.Database.Database, client)
-	if err != nil {
+	if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
 		return false, errors.Wrapf(err, "failed to clean mongo validation database")
 	}
 
@@ -72,16 +70,19 @@ func getRestoreCollectionNames(databaseName string, client *mongo.Client) ([]str
 	return collectionNames, nil
 }
 
-func checkRetoreDatabase(backupResult map[string]string, collectionNames []string, output []byte) (int, error) {
+func checkRetoreDatabase(backupResult map[string]string, collectionNames []string) error {
 	checkCount := 0
 	for _, collectionName := range collectionNames {
 		if _, ok := backupResult[collectionName]; ok {
 			checkCount++
 		} else {
-			return 0, errors.New(fmt.Sprintf("Collection %v not found in backup", collectionName))
+			return errors.New(fmt.Sprintf("Collection %v not found in backup", collectionName))
 		}
 	}
-	return checkCount, nil
+	if checkCount != len(backupResult) {
+		return errors.New(fmt.Sprintf("Backup collection count: %v and restore collection count: %v are not the same", len(backupResult), checkCount))
+	}
+	return nil
 }
 
 func runRestore(archive string, plan config.Plan) ([]byte, error) {
