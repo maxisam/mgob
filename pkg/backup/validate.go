@@ -96,7 +96,7 @@ func runRestore(archive string, plan config.Plan) ([]byte, error) {
 		}
 		return nil, errors.Wrapf(err, "mongorestore log %v", ex)
 	}
-	log.Infof("restore output: %v", string(output))
+	log.Debugf("restore output: %v", string(output))
 	return output, nil
 }
 

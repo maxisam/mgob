@@ -53,7 +53,7 @@ func getDumpedDocMap(output string) map[string]string {
 			matches := reg.FindStringSubmatch(line)
 			if reg.NumSubexp() == 2 {
 				result[matches[1]] = matches[2]
-				log.Infof("dumped %v documents from %v", matches[2], matches[1])
+				log.Debugf("dumped %v documents from %v", matches[2], matches[1])
 			}
 		}
 	}
