@@ -10,8 +10,14 @@ func BuildDumpCmd(archive string, target config.Target) string {
 	return buildCmd("mongodump", archive, target)
 }
 
-func BuildRestoreCmd(archive string, target config.Target) string {
+func BuildRestoreCmd(archive string, target config.Target, restore config.Target) string {
+	if target.Database != restore.Database {
+		cmd := buildCmd("mongorestore", archive, target)
+		cmd += fmt.Sprintf(" --nsFrom %v.* --nsTo %v.* ", target.Database, restore.Database)
+		return cmd
+	}
 	return buildCmd("mongorestore", archive, target)
+
 }
 
 // command: mongodump | mongorestore
