@@ -42,5 +42,8 @@ func buildCmd(command string, archive string, target config.Target) string {
 }
 
 func buildUri(target config.Target) string {
-	return fmt.Sprintf("mongodb://%v:%v@%v:%v", target.Username, target.Password, target.Host, target.Port)
+	if target.Username != "" && target.Password != "" {
+		return fmt.Sprintf("mongodb://%v:%v@%v:%v", target.Username, target.Password, target.Host, target.Port)
+	}
+	return fmt.Sprintf("mongodb://%v:%v", target.Host, target.Port)
 }

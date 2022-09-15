@@ -33,15 +33,15 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	}
 	collectionNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
 	if err != nil {
-		return false, err
+		return false, errors.Wrapf(err, "failed to get collection names")
 	}
 	_, err = runCheck(backupResult, collectionNames, output)
 	if err != nil {
-		return false, err
+		return false, errors.Wrapf(err, "failed to run validation check")
 	}
 	err = cleanMongo(plan.Validation.Database.Database, client)
 	if err != nil {
-		return false, err
+		return false, errors.Wrapf(err, "failed to clean mongo validation database")
 	}
 
 	return true, nil
@@ -99,6 +99,7 @@ func cleanMongo(dbName string, client *mongo.Client) error {
 func getMongoClient(uri string) (*mongo.Client, context.Context, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	log.Infof("Validation: connect to %v", uri)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, ctx, errors.Wrapf(err, "failed to connect to mongo with uri %v", uri)
