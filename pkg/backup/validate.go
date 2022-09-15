@@ -56,8 +56,9 @@ func dispose(client *mongo.Client, ctx context.Context) {
 func getRestoreCollectionNames(databaseName string, client *mongo.Client) ([]string, error) {
 	collectionNames, err := client.Database(databaseName).ListCollectionNames(context.TODO(), bson.M{})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to get collection names in database %v", databaseName)
 	}
+	log.Infof("Validation: collection names %v", strings.Join(collectionNames, ","))
 	return collectionNames, nil
 }
 

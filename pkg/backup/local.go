@@ -44,7 +44,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 
 func getDumpedDocMap(output string) map[string]string {
 	result := map[string]string{}
-	dbDocCapRegex := `done dumping\s(\S*)\s\((\d*).document`
+	dbDocCapRegex := `done dumping\s.*\.(\S*)\s\((\d*).document`
 	reg := regexp.MustCompile(dbDocCapRegex)
 	lines := strings.Split(output, "\n")
 
