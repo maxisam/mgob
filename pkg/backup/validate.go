@@ -3,6 +3,7 @@ package backup
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -24,6 +25,9 @@ import (
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
 	output, err := runRestore(archive, plan)
 	if err != nil {
+		return false, errors.Wrapf(err, "failed to execute restore command")
+	}
+	if err := checkIfAnyFailure(string(output)); err != nil {
 		return false, errors.Wrapf(err, "failed to restore backup")
 	}
 	client, ctx, err := getMongoClient(buildUri(plan.Validation.Database))
@@ -45,6 +49,18 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	}
 
 	return true, nil
+}
+
+func checkIfAnyFailure(output string) error {
+	numberOfFailedCaptureRegex := `(\d+)\sdocument\(s\)\srestored\ssuccessfully\.\s(\d+)\sdocument\(s\)\sfailed`
+	reg := regexp.MustCompile(numberOfFailedCaptureRegex)
+	matches := reg.FindStringSubmatch(output)
+	if reg.NumSubexp() == 2 {
+		if matches[1] == "0" || matches[2] != "0" {
+			return errors.New(fmt.Sprintf("mongorestore failed with %v failed documents", matches[1]))
+		}
+	}
+	return nil
 }
 
 func dispose(client *mongo.Client, ctx context.Context) {
@@ -85,7 +101,6 @@ func runRestore(archive string, plan config.Plan) ([]byte, error) {
 		}
 		return nil, errors.Wrapf(err, "mongorestore log %v", ex)
 	}
-
 	log.Infof("restore output: %v", string(output))
 	return output, nil
 }
