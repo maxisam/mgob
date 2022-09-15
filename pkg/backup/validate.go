@@ -16,12 +16,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Responsible to restore backup from one source
-// using mongorestore
-// Responsibilities
-// - Download backup from one source
-// - ValidateBackup backup using mongorestore
-// - Testing restoring using queries defined by plan
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
 	output, err := runRestore(archive, plan)
 	if err != nil {
@@ -30,7 +24,7 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	if err := checkIfAnyFailure(string(output)); err != nil {
 		return false, errors.Wrapf(err, "failed to restore backup")
 	}
-	client, ctx, err := getMongoClient(buildUri(plan.Validation.Database))
+	client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
 	defer dispose(client, ctx)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get mongo client")
@@ -39,9 +33,9 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get collection names")
 	}
-	_, err = runCheck(backupResult, collectionNames, output)
+	_, err = checkRetoreDatabase(backupResult, collectionNames, output)
 	if err != nil {
-		return false, errors.Wrapf(err, "failed to run validation check")
+		return false, errors.Wrapf(err, "failed to run validation check against restore database")
 	}
 	err = cleanMongo(plan.Validation.Database.Database, client)
 	if err != nil {
@@ -78,7 +72,7 @@ func getRestoreCollectionNames(databaseName string, client *mongo.Client) ([]str
 	return collectionNames, nil
 }
 
-func runCheck(backupResult map[string]string, collectionNames []string, output []byte) (int, error) {
+func checkRetoreDatabase(backupResult map[string]string, collectionNames []string, output []byte) (int, error) {
 	checkCount := 0
 	for _, collectionName := range collectionNames {
 		if _, ok := backupResult[collectionName]; ok {

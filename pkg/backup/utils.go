@@ -7,21 +7,21 @@ import (
 )
 
 func BuildDumpCmd(archive string, target config.Target) string {
-	return buildCmd("mongodump", archive, target)
+	return buildCmd("mongodump", archive, target, "")
 }
 
 func BuildRestoreCmd(archive string, target config.Target, restore config.Target) string {
 	if target.Database != restore.Database {
-		cmd := buildCmd("mongorestore", archive, target)
-		cmd += fmt.Sprintf(" --nsFrom %v.* --nsTo %v.* ", target.Database, restore.Database)
+		cmd := buildCmd("mongorestore", archive, restore, target.Database)
+		cmd += fmt.Sprintf("--nsFrom %v.* --nsTo %v.* ", target.Database, restore.Database)
 		return cmd
 	}
-	return buildCmd("mongorestore", archive, target)
+	return buildCmd("mongorestore", archive, restore, "")
 
 }
 
 // command: mongodump | mongorestore
-func buildCmd(command string, archive string, target config.Target) string {
+func buildCmd(command string, archive string, target config.Target, overrideDBName string) string {
 	cmd := fmt.Sprintf("%v --archive=%v --gzip ", command, archive)
 	// using uri (New in version 3.4.6)
 	// host/port/username/password are incompatible with uri
@@ -41,17 +41,21 @@ func buildCmd(command string, archive string, target config.Target) string {
 		if command == "mongodump" {
 			cmd += fmt.Sprintf("--db %v ", target.Database)
 		} else {
-			cmd += fmt.Sprintf("--nsInclude %v.* ", target.Database)
+			if overrideDBName != "" {
+				cmd += fmt.Sprintf("--nsInclude %v.* ", overrideDBName)
+			} else {
+				cmd += fmt.Sprintf("--nsInclude %v.* ", target.Database)
+			}
 		}
 	}
 
 	if target.Params != "" {
-		cmd += fmt.Sprintf("%v", target.Params)
+		cmd += fmt.Sprintf("%v ", target.Params)
 	}
 	return cmd
 }
 
-func buildUri(target config.Target) string {
+func BuildUri(target config.Target) string {
 	if target.Username != "" && target.Password != "" {
 		return fmt.Sprintf("mongodb://%v:%v@%v:%v", target.Username, target.Password, target.Host, target.Port)
 	}
