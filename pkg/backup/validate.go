@@ -24,21 +24,22 @@ import (
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
 	output, err := runRestore(archive, plan)
 	if err != nil {
-		return false, err
+		return false, errors.Wrapf(err, "failed to restore backup")
 	}
 	client, ctx, err := getMongoClient(buildUri(plan.Validation.Database))
+	defer dispose(client, ctx)
+	if err != nil {
+		return false, errors.Wrapf(err, "failed to get mongo client")
+	}
 	collectionNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
 	if err != nil {
-		defer dispose(client, ctx)
 		return false, err
 	}
 	_, err = runCheck(backupResult, collectionNames, output)
 	if err != nil {
-		defer dispose(client, ctx)
 		return false, err
 	}
 	err = cleanMongo(plan.Validation.Database.Database, client)
-	defer dispose(client, ctx)
 	if err != nil {
 		return false, err
 	}
@@ -74,6 +75,7 @@ func runCheck(backupResult map[string]string, collectionNames []string, output [
 
 func runRestore(archive string, plan config.Plan) ([]byte, error) {
 	restoreCmd := BuildRestoreCmd(archive, plan)
+	log.Infof("Validation: restore backup with : %v", restoreCmd)
 	output, err := sh.Command("/bin/sh", "-c", restoreCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
@@ -82,7 +84,7 @@ func runRestore(archive string, plan config.Plan) ([]byte, error) {
 		}
 		return nil, errors.Wrapf(err, "mongorestore log %v", ex)
 	}
-	log.Debugf("restore output: %v", output)
+	log.Infof("restore output: %v", string(output))
 	return output, nil
 }
 
@@ -99,7 +101,7 @@ func getMongoClient(uri string) (*mongo.Client, context.Context, error) {
 	defer cancel()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return nil, ctx, err
+		return nil, ctx, errors.Wrapf(err, "failed to connect to mongo with uri %v", uri)
 	}
 	return client, ctx, nil
 }
