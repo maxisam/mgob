@@ -37,5 +37,5 @@ func Test_getDumpedDocCount(t *testing.T) {
 	`)
 	result := getDumpedDocMap(string(dumpOutput))
 	assert.Len(t, result, 4)
-	assert.Equal(t, strconv.Itoa(7415), result["DBCollection.Contents_Published"])
+	assert.Equal(t, strconv.Itoa(7415), result["Contents_Published"])
 }
