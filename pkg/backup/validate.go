@@ -26,8 +26,8 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	if err != nil {
 		return false, err
 	}
-	client, ctx, err := getMongoClient(buildUri(plan.Restore.Database))
-	collectionNames, err := getRestoreCollectionNames(plan.Restore.Database.Database, client)
+	client, ctx, err := getMongoClient(buildUri(plan.Validation.Database))
+	collectionNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
 	if err != nil {
 		defer dispose(client, ctx)
 		return false, err
@@ -37,7 +37,7 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 		defer dispose(client, ctx)
 		return false, err
 	}
-	err = cleanMongo(plan.Restore.Database.Database, client)
+	err = cleanMongo(plan.Validation.Database.Database, client)
 	defer dispose(client, ctx)
 	if err != nil {
 		return false, err

@@ -15,7 +15,7 @@ type Plan struct {
 	Target     Target      `yaml:"target"`
 	Scheduler  Scheduler   `yaml:"scheduler"`
 	Retry      Retry       `yaml:"retry"`
-	Restore    Restore     `yaml:"restore"`
+	Validation *Validation `yaml:"validation"`
 	Encryption *Encryption `yaml:"encryption"`
 	S3         *S3         `yaml:"s3"`
 	GCloud     *GCloud     `yaml:"gcloud"`
@@ -27,7 +27,7 @@ type Plan struct {
 	Team       *Team       `yaml:"team"`
 }
 
-type Restore struct {
+type Validation struct {
 	Database Target `yaml:"database"`
 }
 

@@ -31,9 +31,11 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 		}
 		return "", "", errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
 	}
-	backupResult := getDumpedDocMap(string(output))
-	if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
-		return "", "", errors.Wrapf(err, "backup validation failed")
+	if plan.Validation != nil {
+		backupResult := getDumpedDocMap(string(output))
+		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
+			return "", "", errors.Wrapf(err, "backup validation failed")
+		}
 	}
 	logToFile(mlog, output)
 
