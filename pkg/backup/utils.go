@@ -32,7 +32,11 @@ func buildCmd(command string, archive string, target config.Target) string {
 	}
 
 	if target.Database != "" {
-		cmd += fmt.Sprintf("--db %v ", target.Database)
+		if command == "mongodump" {
+			cmd += fmt.Sprintf("--db %v ", target.Database)
+		} else {
+			cmd += fmt.Sprintf("--nsInclude %v.* ", target.Database)
+		}
 	}
 
 	if target.Params != "" {
