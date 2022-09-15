@@ -19,7 +19,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	retryCount := 0.0
 	archive := fmt.Sprintf("%v/%v-%v.gz", tmpPath, plan.Name, ts.Unix())
 	mlog := fmt.Sprintf("%v/%v-%v.log", tmpPath, plan.Name, ts.Unix())
-	dumpCmd := BuildDumpCmd(archive, plan)
+	dumpCmd := BuildDumpCmd(archive, plan.Target)
 	timeout := time.Duration(plan.Scheduler.Timeout) * time.Minute
 
 	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))

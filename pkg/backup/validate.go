@@ -74,7 +74,7 @@ func runCheck(backupResult map[string]string, collectionNames []string, output [
 }
 
 func runRestore(archive string, plan config.Plan) ([]byte, error) {
-	restoreCmd := BuildRestoreCmd(archive, plan)
+	restoreCmd := BuildRestoreCmd(archive, plan.Validation.Database)
 	log.Infof("Validation: restore backup with : %v", restoreCmd)
 	output, err := sh.Command("/bin/sh", "-c", restoreCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {

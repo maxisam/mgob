@@ -6,12 +6,12 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func BuildDumpCmd(archive string, plan config.Plan) string {
-	return buildCmd("mongodump", archive, plan.Target)
+func BuildDumpCmd(archive string, target config.Target) string {
+	return buildCmd("mongodump", archive, target)
 }
 
-func BuildRestoreCmd(archive string, plan config.Plan) string {
-	return buildCmd("mongorestore", archive, plan.Target)
+func BuildRestoreCmd(archive string, target config.Target) string {
+	return buildCmd("mongorestore", archive, target)
 }
 
 // command: mongodump | mongorestore
