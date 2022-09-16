@@ -43,9 +43,9 @@ script:
 
 after_success:
   - if [ -z "$DOCKER_USER" ]; then
-      echo "PR build, skipping Docker Hub push";
+    echo "PR build, skipping Docker Hub push";
     else
-      make publish;
+    make publish;
     fi
 
 deploy:
@@ -53,4 +53,4 @@ deploy:
   script: make release
   on:
     tags: true
-    branch: master
+    branch: main

@@ -2,10 +2,10 @@ name: Dev Build
 
 on:
   pull_request:
-    branches: ["master"]
+    branches: ["main"]
 
 jobs:
-  test-build:
+  dev-build:
     runs-on: ubuntu-latest
     env:
       APP_VERSION: dev
