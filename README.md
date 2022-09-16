@@ -93,6 +93,8 @@ target:
   password: "secret"
   # add custom params to mongodump (eg. Auth or SSL support), leave blank if not needed
   params: "--ssl --authenticationDatabase admin"
+  # disable gzip compression
+  noGzip: false
 retry:
   # number of retries
   attempts: 3
@@ -102,6 +104,7 @@ validation:
   database:
     host: "127.0.0.1"
     port: 27017
+    noGzip: false
     database: test_restore # database name for restore
 # Encryption (optional)
 encryption:

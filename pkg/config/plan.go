@@ -38,6 +38,7 @@ type Target struct {
 	Password string `yaml:"password"`
 	Port     int    `yaml:"port"`
 	Username string `yaml:"username"`
+	NoGzip   bool   `yaml:"noGzip"`
 	Params   string `yaml:"params"`
 }
 

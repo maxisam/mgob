@@ -22,7 +22,10 @@ func BuildRestoreCmd(archive string, target config.Target, restore config.Target
 
 // command: mongodump | mongorestore
 func buildCmd(command string, archive string, target config.Target, overrideDBName string) string {
-	cmd := fmt.Sprintf("%v --archive=%v --gzip ", command, archive)
+	cmd := fmt.Sprintf("%v --archive=%v ", command, archive)
+	if !target.NoGzip {
+		cmd += "--gzip "
+	}
 	// using uri (New in version 3.4.6)
 	// host/port/username/password are incompatible with uri
 	// https://docs.mongodb.com/manual/reference/program/mongodump/#cmdoption-mongodump-uri
