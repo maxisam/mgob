@@ -39,7 +39,7 @@ MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/reposit
 Supported tags:
 
 - `maxisam/mgob:latest` latest stable [release](https://github.com/maxisam/mgob/releases)
-- `maxisam/mgob:edge` master branch latest successful [build](https://github.com/maxisam/mgob/actions/workflows/release.yml)
+- `maxisam/mgob:edge` main branch latest successful [build](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 
 Compatibility matrix:
 
@@ -64,7 +64,7 @@ docker run -dp 8090:8090 --name mgob \
 
 Kubernetes:
 
-A step by step guide on running MGOB as a StatefulSet with PersistentVolumeClaims can be found [here](https://github.com/stefanprodan/mgob/tree/master/k8s).
+A step by step guide on running MGOB as a StatefulSet with PersistentVolumeClaims can be found [here](https://github.com/stefanprodan/mgob/tree/main/k8s).
 
 #### Configure
 

@@ -2,7 +2,7 @@ name: Dev Build
 
 on:
   pull_request:
-    branches: ["master"]
+    branches: ["main"]
 
 jobs:
   test-build:
