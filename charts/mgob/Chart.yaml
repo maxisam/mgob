@@ -1,6 +1,8 @@
 apiVersion: v2
 name: mgob
-description: mongodb-backup
+description: |
+  MongoDB dockerized backup agent.
+  Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -12,6 +14,8 @@ description: mongodb-backup
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
+sources:
+  - https://github.com/maxisam/mgob
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)

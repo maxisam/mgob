@@ -20,7 +20,7 @@ func appVersionCtx(version string) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			data := appVersion{
 				"mgob_version": version,
-				"repository":   "github.com/stefanprodan/mgob",
+				"repository":   "github.com/maxisam/mgob",
 				"go_version":   runtime.Version(),
 				"os":           runtime.GOOS,
 				"arch":         runtime.GOARCH,
