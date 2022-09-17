@@ -1,9 +1,16 @@
-kind: ConfigMap
+{{- if (.Values.config) }}
 apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ template "mgob.fullname" . }}-config
-  labels:
-    {{- include "mgob.labels" . | nindent 4 }}
+  name: {{ template "common.names.fullname" . }}-config
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
 data:
   {{- range $name,$value := .Values.config }}
   {{ $name | quote }}: |-
@@ -17,6 +24,14 @@ data:
     {{- end }}
     {{- with $value.encryption }}
     encryption:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.validation }}
+    validation:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
+    {{- with $value.retry }}
+    retry:
       {{ toYaml . | nindent 6 | trim }}
     {{- end }}
     {{- with $value.s3 }}
@@ -47,4 +62,9 @@ data:
     slack:
       {{ toYaml . | nindent 6 | trim }}
     {{- end }}
+    {{- with $value.team }}
+    team:
+      {{ toYaml . | nindent 6 | trim }}
+    {{- end }}
   {{- end }}
+{{- end }}
