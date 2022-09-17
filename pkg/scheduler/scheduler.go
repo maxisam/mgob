@@ -92,10 +92,10 @@ func (b backupJob) Run() {
 	res, err := backup.Run(b.plan, b.conf, b.modules)
 	if err != nil {
 		status = "500"
-		backupLog = fmt.Sprintf("Backup failed %v", err)
+		backupLog = fmt.Sprintf("BACKUP FAILED: %v", err)
 		log.WithField("plan", b.plan.Name).Error(backupLog)
 
-		if err := notifier.SendNotification(fmt.Sprintf("%v backup failed", b.plan.Name),
+		if err := notifier.SendNotification(fmt.Sprintf("BACKUP FAILED: %v backup failed", b.plan.Name),
 			err.Error(), true, b.plan); err != nil {
 			log.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)
 		}
