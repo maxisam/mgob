@@ -1,0 +1,20 @@
+apiVersion: v1
+entries:
+  mgob:
+  - apiVersion: v2
+    appVersion: 1.8.4
+    created: "2022-09-17T07:08:03.904287996Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: mongodb-backup
+    digest: 08b50f98e66740a07d2ec238e2434a00ae42d6459b153490c962b0a344ed11fa
+    name: mgob
+    type: application
+    urls:
+    - https://github.com/maxisam/mgob/releases/download/mgob-1.8.0/mgob-1.8.0.tgz
+    version: 1.8.0
+generated: "2022-09-17T07:08:03.904297496Z"
