@@ -8,6 +8,10 @@ MGOB is a MongoDB backup automation tool built with Go.
 
 This is a fork from [stefanprodan](https://github.com/stefanprodan/mgob) with some additional features.
 
+The original author is going to archive this project. https://github.com/stefanprodan/mgob/issues/161
+
+That is why I add features to my fork only.
+
 ## New Features in this fork
 
 - Add Backup validation
