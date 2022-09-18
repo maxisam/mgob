@@ -21,7 +21,8 @@ That is why I add features to my fork only.
 - Update Go to 1.19
 - Update other dependencies
 - Add warnOnly option to all notification channels
-- Use Gihub Action for CI/CD
+- Use Github Action for CI/CD
+- New Helm Chart with metric & liveness prob & new features etc
 
 ## Original Features
 
@@ -43,7 +44,6 @@ MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/reposit
 Supported tags:
 
 - `maxisam/mgob:latest` latest stable [release](https://github.com/maxisam/mgob/releases)
-- `maxisam/mgob:edge` main branch latest successful [build](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 
 Compatibility matrix:
 
