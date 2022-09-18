@@ -104,7 +104,7 @@ func runRestore(archive string, plan config.Plan) ([]byte, error) {
 func cleanMongo(dbName string, client *mongo.Client) error {
 	err := client.Database(dbName).Drop(context.TODO())
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to drop database %v", dbName)
 	}
 	return nil
 }
