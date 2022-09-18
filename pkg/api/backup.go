@@ -42,7 +42,7 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 	res, err := backup.Run(plan, &cfg, &modules)
 	if err != nil {
 		log.WithField("plan", planID).Errorf("On demand backup failed %v", err)
-		if err := notifier.SendNotification(fmt.Sprintf("%v on demand backup failed", planID),
+		if err := notifier.SendNotification(fmt.Sprintf("BACKUP FAILED: %v on demand backup failed", planID),
 			err.Error(), true, plan); err != nil {
 			log.WithField("plan", plan.Name).Errorf("Notifier failed for on demand backup %v", err)
 		}
