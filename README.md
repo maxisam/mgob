@@ -3,6 +3,7 @@
 [![Release](https://github.com/maxisam/mgob/actions/workflows/release.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 [![Build Status](https://github.com/maxisam/mgob/actions/workflows/build.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/build.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
+![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.6](https://img.shields.io/badge/AppVersion-1.8.6-informational?style=flat-square)
 
 MGOB is a MongoDB backup automation tool built with Go.
 
@@ -23,6 +24,14 @@ That is why I add features to my fork only.
 - Add warnOnly option to all notification channels
 - Use Github Action for CI/CD
 - New Helm Chart with metric & liveness prob & new features etc
+
+### Helm Chart
+
+```bash
+helm repo add maxisam https://maxisam.github.io/mgob/
+helm repo update
+helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
+```
 
 ## Original Features
 
