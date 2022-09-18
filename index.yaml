@@ -2,6 +2,26 @@ apiVersion: v1
 entries:
   mgob:
   - apiVersion: v2
+    appVersion: 1.8.6
+    created: "2022-09-18T07:49:56.220589229Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: 'A Helm chart for Mgob,  MongoDB dockerized backup agent. Runs scheduled
+      backups with retention, S3 & SFTP upload, notifications, instrumentation with
+      Prometheus and more. '
+    digest: c38a3a3dea5194dc7cd6fd5e8b17cd0e62759ce0606ffc7efb8b81984898afc9
+    name: mgob
+    sources:
+    - https://github.com/maxisam/mgob
+    type: application
+    urls:
+    - https://github.com/maxisam/mgob/releases/download/mgob-1.8.1/mgob-1.8.1.tgz
+    version: 1.8.1
+  - apiVersion: v2
     appVersion: 1.8.4
     created: "2022-09-17T07:08:03.904287996Z"
     dependencies:
@@ -17,4 +37,4 @@ entries:
     urls:
     - https://github.com/maxisam/mgob/releases/download/mgob-1.8.0/mgob-1.8.0.tgz
     version: 1.8.0
-generated: "2022-09-17T07:08:03.904297496Z"
+generated: "2022-09-18T07:49:56.22069503Z"
