@@ -34,6 +34,14 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	if plan.Validation != nil {
 		backupResult := getDumpedDocMap(string(output))
 		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
+			client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
+			if err != nil {
+				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to get mongo client for cleanup")
+			}
+			defer dispose(client, ctx)
+			if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
+				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to clean mongo validation database")
+			}
 			return "", "", errors.Wrapf(err, "backup validation failed")
 		}
 	}
@@ -44,7 +52,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 
 func getDumpedDocMap(output string) map[string]string {
 	result := map[string]string{}
-	dbDocCapRegex := `done dumping\s.*\.(\S*)\s\((\d*).document`
+	dbDocCapRegex := `done dumping\s\w*\.(\S*)\s\((\d*).document`
 	reg := regexp.MustCompile(dbDocCapRegex)
 	lines := strings.Split(output, "\n")
 
