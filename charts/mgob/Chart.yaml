@@ -9,7 +9,7 @@ type: application
 sources:
   - https://github.com/maxisam/mgob
 
-version: 1.8.0
+version: 1.8.1
 
 appVersion: "1.8.6"
 
