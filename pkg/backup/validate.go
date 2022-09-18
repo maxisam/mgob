@@ -19,6 +19,15 @@ import (
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
 	output, err := runRestore(archive, plan)
 	if err != nil {
+		log.Error("Validation: Failed to execute restore command. restore failed, cleaning up")
+		client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
+		if err != nil {
+			return false, errors.Wrapf(err, "Failed to execute restore command, failed to get mongo client for cleanup")
+		}
+		defer dispose(client, ctx)
+		if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
+			return false, errors.Wrapf(err, "Failed to execute restore command, failed to clean mongo validation database")
+		}
 		return false, errors.Wrapf(err, "failed to execute restore command")
 	}
 	if err := checkIfAnyFailure(string(output)); err != nil {
