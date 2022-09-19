@@ -1,145 +1,142 @@
 # mgob
 
-![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.6](https://img.shields.io/badge/AppVersion-1.8.6-informational?style=flat-square)
+![Version: 1.8.1](https://img.shields.io/badge/Version-1.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.6](https://img.shields.io/badge/AppVersion-1.8.6-informational?style=flat-square)
 
-A Helm chart for Mgob, MongoDB dockerized backup agent.
+A Helm chart for Mgob,  MongoDB dockerized backup agent.
 Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
 
 ## Source Code
 
-- <https://github.com/maxisam/mgob>
+* <https://github.com/maxisam/mgob>
 
 ## Requirements
 
-| Repository                         | Name   | Version |
-| ---------------------------------- | ------ | ------- |
-| https://charts.bitnami.com/bitnami | common | 1.x.x   |
+| Repository | Name | Version |
+|------------|------|---------|
+| https://charts.bitnami.com/bitnami | common | 1.x.x |
 
 ## Values
 
-| Key                                                | Type   | Default                                                                                                                                       | Description                                               |
-| -------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| affinity                                           | object | `{}`                                                                                                                                          |                                                           |
-| clusterDomain                                      | string | `"cluster.local"`                                                                                                                             |                                                           |
-| commonAnnotations.app                              | string | `"mgob"`                                                                                                                                      |                                                           |
-| commonLabels                                       | object | `{}`                                                                                                                                          |                                                           |
-| config                                             | object | `{}`                                                                                                                                          | Backup plans. For details, see [values.yaml](values.yaml) |
-| containerSecurityContext.allowPrivilegeEscalation  | bool   | `false`                                                                                                                                       |                                                           |
-| containerSecurityContext.capabilities.drop[0]      | string | `"ALL"`                                                                                                                                       |                                                           |
-| containerSecurityContext.enabled                   | bool   | `false`                                                                                                                                       |                                                           |
-| containerSecurityContext.privileged                | bool   | `false`                                                                                                                                       |                                                           |
-| containerSecurityContext.runAsNonRoot              | bool   | `false`                                                                                                                                       |                                                           |
-| containerSecurityContext.runAsUser                 | int    | `0`                                                                                                                                           |                                                           |
-| customLivenessProbe                                | object | `{}`                                                                                                                                          |                                                           |
-| customReadinessProbe                               | object | `{}`                                                                                                                                          |                                                           |
-| customStartupProbe                                 | object | `{}`                                                                                                                                          |                                                           |
-| env                                                | list   | `[]`                                                                                                                                          |                                                           |
-| fullnameOverride                                   | string | `""`                                                                                                                                          |                                                           |
-| image.pullPolicy                                   | string | `"IfNotPresent"`                                                                                                                              |                                                           |
-| image.pullSecrets                                  | list   | `[]`                                                                                                                                          |                                                           |
-| image.registry                                     | string | `"docker.io"`                                                                                                                                 |                                                           |
-| image.repository                                   | string | `"maxisam/mgob"`                                                                                                                              |                                                           |
-| image.tag                                          | string | `"latest"`                                                                                                                                    |                                                           |
-| ingress.annotations                                | object | `{}`                                                                                                                                          |                                                           |
-| ingress.apiVersion                                 | string | `""`                                                                                                                                          |                                                           |
-| ingress.enabled                                    | bool   | `false`                                                                                                                                       |                                                           |
-| ingress.extraHosts                                 | list   | `[]`                                                                                                                                          |                                                           |
-| ingress.extraPaths                                 | list   | `[]`                                                                                                                                          |                                                           |
-| ingress.extraRules                                 | list   | `[]`                                                                                                                                          |                                                           |
-| ingress.extraTls                                   | list   | `[]`                                                                                                                                          |                                                           |
-| ingress.hostname                                   | string | `"mgob.local"`                                                                                                                                |                                                           |
-| ingress.ingressClassName                           | string | `"nginx"`                                                                                                                                     |                                                           |
-| ingress.path                                       | string | `"/"`                                                                                                                                         |                                                           |
-| ingress.pathType                                   | string | `"Prefix"`                                                                                                                                    |                                                           |
-| ingress.secrets                                    | list   | `[]`                                                                                                                                          |                                                           |
-| ingress.selfSigned                                 | bool   | `false`                                                                                                                                       |                                                           |
-| ingress.tls                                        | bool   | `false`                                                                                                                                       |                                                           |
-| ingress.tlsSecretName                              | string | `""`                                                                                                                                          |                                                           |
-| kubeVersion                                        | string | `""`                                                                                                                                          |                                                           |
-| lifecycleHooks                                     | object | `{}`                                                                                                                                          |                                                           |
-| livenessProbe.enabled                              | bool   | `true`                                                                                                                                        |                                                           |
-| livenessProbe.failureThreshold                     | int    | `6`                                                                                                                                           |                                                           |
-| livenessProbe.initialDelaySeconds                  | int    | `5`                                                                                                                                           |                                                           |
-| livenessProbe.periodSeconds                        | int    | `20`                                                                                                                                          |                                                           |
-| livenessProbe.successThreshold                     | int    | `1`                                                                                                                                           |                                                           |
-| livenessProbe.timeoutSeconds                       | int    | `1`                                                                                                                                           |                                                           |
-| logLevel                                           | string | `"info"`                                                                                                                                      |                                                           |
-| metrics.serviceMonitor.enabled                     | bool   | `true`                                                                                                                                        |                                                           |
-| metrics.serviceMonitor.interval                    | string | `"30s"`                                                                                                                                       |                                                           |
-| metrics.serviceMonitor.namespace                   | string | `""`                                                                                                                                          |                                                           |
-| metrics.serviceMonitor.port                        | string | `"http"`                                                                                                                                      |                                                           |
-| metrics.serviceMonitor.scrapeTimeout               | string | `"10s"`                                                                                                                                       |                                                           |
-| mongodb.enabled                                    | bool   | `true`                                                                                                                                        |                                                           |
-| mongodb.image.pullPolicy                           | string | `"IfNotPresent"`                                                                                                                              |                                                           |
-| mongodb.image.registry                             | string | `"docker.io"`                                                                                                                                 |                                                           |
-| mongodb.image.repository                           | string | `"mongo"`                                                                                                                                     |                                                           |
-| mongodb.image.tag                                  | string | `"4.4.6"`                                                                                                                                     |                                                           |
-| mongodb.port                                       | int    | `27017`                                                                                                                                       |                                                           |
-| mongodb.resources.limits.cpu                       | string | `"500m"`                                                                                                                                      |                                                           |
-| mongodb.resources.limits.memory                    | string | `"512Mi"`                                                                                                                                     |                                                           |
-| mongodb.resources.requests.cpu                     | string | `"200m"`                                                                                                                                      |                                                           |
-| mongodb.resources.requests.memory                  | string | `"300Mi"`                                                                                                                                     |                                                           |
-| mongodb.securityContext.allowPrivilegeEscalation   | bool   | `false`                                                                                                                                       |                                                           |
-| mongodb.securityContext.capabilities.drop[0]       | string | `"ALL"`                                                                                                                                       |                                                           |
-| mongodb.securityContext.enabled                    | bool   | `true`                                                                                                                                        |                                                           |
-| mongodb.securityContext.privileged                 | bool   | `false`                                                                                                                                       |                                                           |
-| mongodb.securityContext.runAsNonRoot               | bool   | `false`                                                                                                                                       |                                                           |
-| mongodb.securityContext.runAsUser                  | int    | `1001`                                                                                                                                        |                                                           |
-| mountSecrets                                       | list   | `[]`                                                                                                                                          |                                                           |
-| nameOverride                                       | string | `""`                                                                                                                                          |                                                           |
-| namespaceOverride                                  | string | `""`                                                                                                                                          |                                                           |
-| nodeAffinityPreset.key                             | string | `""`                                                                                                                                          |                                                           |
-| nodeAffinityPreset.type                            | string | `""`                                                                                                                                          |                                                           |
-| nodeAffinityPreset.values                          | list   | `[]`                                                                                                                                          |                                                           |
-| nodeSelector                                       | object | `{}`                                                                                                                                          |                                                           |
-| podAffinityPreset                                  | string | `""`                                                                                                                                          |                                                           |
-| podAnnotations                                     | object | `{}`                                                                                                                                          |                                                           |
-| podAntiAffinityPreset                              | string | `"soft"`                                                                                                                                      |                                                           |
-| podLabels                                          | object | `{}`                                                                                                                                          |                                                           |
-| podSecurityContext.fsGroup                         | int    | `65534`                                                                                                                                       |                                                           |
-| readinessProbe.enabled                             | bool   | `true`                                                                                                                                        |                                                           |
-| readinessProbe.failureThreshold                    | int    | `6`                                                                                                                                           |                                                           |
-| readinessProbe.initialDelaySeconds                 | int    | `5`                                                                                                                                           |                                                           |
-| readinessProbe.periodSeconds                       | int    | `20`                                                                                                                                          |                                                           |
-| readinessProbe.successThreshold                    | int    | `1`                                                                                                                                           |                                                           |
-| readinessProbe.timeoutSeconds                      | int    | `1`                                                                                                                                           |                                                           |
-| replicaCount                                       | int    | `1`                                                                                                                                           |                                                           |
-| resources.limits.cpu                               | string | `"500m"`                                                                                                                                      |                                                           |
-| resources.limits.memory                            | string | `"256Mi"`                                                                                                                                     |                                                           |
-| resources.requests.cpu                             | string | `"100m"`                                                                                                                                      |                                                           |
-| resources.requests.memory                          | string | `"128Mi"`                                                                                                                                     |                                                           |
-| secrets                                            | object | `{}`                                                                                                                                          |                                                           |
-| service.annotations                                | object | `{}`                                                                                                                                          |                                                           |
-| service.clusterIP                                  | string | `""`                                                                                                                                          |                                                           |
-| service.externalTrafficPolicy                      | string | `"Cluster"`                                                                                                                                   |                                                           |
-| service.extraPorts                                 | list   | `[]`                                                                                                                                          |                                                           |
-| service.loadBalancerIP                             | string | `""`                                                                                                                                          |                                                           |
-| service.loadBalancerSourceRanges                   | list   | `[]`                                                                                                                                          |                                                           |
-| service.nodePorts.http                             | string | `""`                                                                                                                                          |                                                           |
-| service.ports.http                                 | int    | `8090`                                                                                                                                        |                                                           |
-| service.sessionAffinity                            | string | `"None"`                                                                                                                                      |                                                           |
-| service.sessionAffinityConfig                      | object | `{}`                                                                                                                                          |                                                           |
-| service.type                                       | string | `"ClusterIP"`                                                                                                                                 |                                                           |
-| serviceAccount.annotations                         | object | `{}`                                                                                                                                          |                                                           |
-| serviceAccount.automountServiceAccountToken        | bool   | `true`                                                                                                                                        |                                                           |
-| serviceAccount.create                              | bool   | `true`                                                                                                                                        |                                                           |
-| serviceAccount.name                                | string | `""`                                                                                                                                          |                                                           |
-| sidecars                                           | list   | `[]`                                                                                                                                          |                                                           |
-| startupProbe.enabled                               | bool   | `true`                                                                                                                                        |                                                           |
-| startupProbe.failureThreshold                      | int    | `6`                                                                                                                                           |                                                           |
-| startupProbe.initialDelaySeconds                   | int    | `10`                                                                                                                                          |                                                           |
-| startupProbe.periodSeconds                         | int    | `20`                                                                                                                                          |                                                           |
-| startupProbe.successThreshold                      | int    | `1`                                                                                                                                           |                                                           |
-| startupProbe.timeoutSeconds                        | int    | `1`                                                                                                                                           |                                                           |
-| storage.longTerm                                   | object | `{"name":"mgob-storage","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"100Gi"}},"storageClassName":"standard"}}` | Persistent volume for backups, see `config.retention`     |
-| storage.restoreTmp.name                            | string | `"mgob-restore-tmp"`                                                                                                                          |                                                           |
-| storage.restoreTmp.spec.accessModes[0]             | string | `"ReadWriteOnce"`                                                                                                                             |                                                           |
-| storage.restoreTmp.spec.resources.requests.storage | string | `"100Gi"`                                                                                                                                     |                                                           |
-| storage.restoreTmp.spec.storageClassName           | string | `"standard"`                                                                                                                                  |                                                           |
-| storage.tmp                                        | object | `{"name":"mgob-tmp","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"standard"}}`      | Persistent volume for temporary files                     |
-| tolerations                                        | list   | `[]`                                                                                                                                          |                                                           |
-| updateStrategy.type                                | string | `"RollingUpdate"`                                                                                                                             |                                                           |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| kubeVersion | string | `""` |  |
+| nameOverride | string | `""` |  |
+| fullnameOverride | string | `""` |  |
+| namespaceOverride | string | `""` |  |
+| commonLabels | object | `{}` |  |
+| commonAnnotations.app | string | `"mgob"` |  |
+| clusterDomain | string | `"cluster.local"` |  |
+| logLevel | string | `"info"` |  |
+| image.registry | string | `"docker.io"` |  |
+| image.repository | string | `"maxisam/mgob"` |  |
+| image.tag | string | `"latest"` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.pullSecrets | list | `[]` |  |
+| secrets | object | `{}` |  |
+| mountSecrets | list | `[]` |  |
+| env | list | `[]` |  |
+| config | object | `{}` | Backup plans. For details, see [values.yaml](values.yaml) |
+| replicaCount | int | `1` |  |
+| sidecars | list | `[]` |  |
+| lifecycleHooks | object | `{}` |  |
+| podAnnotations | object | `{}` |  |
+| podLabels | object | `{}` |  |
+| updateStrategy.type | string | `"RollingUpdate"` |  |
+| podAffinityPreset | string | `""` |  |
+| podAntiAffinityPreset | string | `"soft"` |  |
+| nodeAffinityPreset.type | string | `""` |  |
+| nodeAffinityPreset.key | string | `""` |  |
+| nodeAffinityPreset.values | list | `[]` |  |
+| affinity | object | `{}` |  |
+| nodeSelector | object | `{}` |  |
+| tolerations | list | `[]` |  |
+| resources.limits.cpu | string | `"500m"` |  |
+| resources.limits.memory | string | `"256Mi"` |  |
+| resources.requests.cpu | string | `"100m"` |  |
+| resources.requests.memory | string | `"128Mi"` |  |
+| podSecurityContext.fsGroup | int | `65534` |  |
+| containerSecurityContext.enabled | bool | `false` |  |
+| containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
+| containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| containerSecurityContext.privileged | bool | `false` |  |
+| containerSecurityContext.runAsUser | int | `0` |  |
+| containerSecurityContext.runAsNonRoot | bool | `false` |  |
+| livenessProbe.enabled | bool | `true` |  |
+| livenessProbe.initialDelaySeconds | int | `5` |  |
+| livenessProbe.timeoutSeconds | int | `1` |  |
+| livenessProbe.periodSeconds | int | `20` |  |
+| livenessProbe.failureThreshold | int | `6` |  |
+| livenessProbe.successThreshold | int | `1` |  |
+| readinessProbe.enabled | bool | `true` |  |
+| readinessProbe.initialDelaySeconds | int | `5` |  |
+| readinessProbe.timeoutSeconds | int | `1` |  |
+| readinessProbe.periodSeconds | int | `20` |  |
+| readinessProbe.failureThreshold | int | `6` |  |
+| readinessProbe.successThreshold | int | `1` |  |
+| startupProbe.enabled | bool | `true` |  |
+| startupProbe.initialDelaySeconds | int | `10` |  |
+| startupProbe.timeoutSeconds | int | `1` |  |
+| startupProbe.periodSeconds | int | `20` |  |
+| startupProbe.failureThreshold | int | `6` |  |
+| startupProbe.successThreshold | int | `1` |  |
+| customLivenessProbe | object | `{}` |  |
+| customStartupProbe | object | `{}` |  |
+| customReadinessProbe | object | `{}` |  |
+| service.type | string | `"ClusterIP"` |  |
+| service.ports.http | int | `8090` |  |
+| service.nodePorts.http | string | `""` |  |
+| service.clusterIP | string | `""` |  |
+| service.extraPorts | list | `[]` |  |
+| service.loadBalancerIP | string | `""` |  |
+| service.loadBalancerSourceRanges | list | `[]` |  |
+| service.externalTrafficPolicy | string | `"Cluster"` |  |
+| service.annotations | object | `{}` |  |
+| service.sessionAffinity | string | `"None"` |  |
+| service.sessionAffinityConfig | object | `{}` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.pathType | string | `"Prefix"` |  |
+| ingress.apiVersion | string | `""` |  |
+| ingress.hostname | string | `"mgob.local"` |  |
+| ingress.path | string | `"/"` |  |
+| ingress.annotations | object | `{}` |  |
+| ingress.tls | bool | `false` |  |
+| ingress.tlsSecretName | string | `""` |  |
+| ingress.extraPaths | list | `[]` |  |
+| ingress.selfSigned | bool | `false` |  |
+| ingress.ingressClassName | string | `"nginx"` |  |
+| ingress.extraHosts | list | `[]` |  |
+| ingress.extraTls | list | `[]` |  |
+| ingress.secrets | list | `[]` |  |
+| ingress.extraRules | list | `[]` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automountServiceAccountToken | bool | `true` |  |
+| metrics.serviceMonitor.enabled | bool | `true` |  |
+| metrics.serviceMonitor.port | string | `"http"` |  |
+| metrics.serviceMonitor.namespace | string | `""` |  |
+| metrics.serviceMonitor.interval | string | `"30s"` |  |
+| metrics.serviceMonitor.scrapeTimeout | string | `"10s"` |  |
+| storage.longTerm | object | `{"name":"mgob-storage","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"100Gi"}},"storageClassName":"standard"}}` | Persistent volume for backups, see `config.retention` |
+| storage.tmp | object | `{"name":"mgob-tmp","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"standard"}}` | Persistent volume for temporary files |
+| storage.restoreTmp.name | string | `"mgob-restore-tmp"` |  |
+| storage.restoreTmp.spec.accessModes[0] | string | `"ReadWriteOnce"` |  |
+| storage.restoreTmp.spec.resources.requests.storage | string | `"100Gi"` |  |
+| storage.restoreTmp.spec.storageClassName | string | `"standard"` |  |
+| mongodb.enabled | bool | `true` |  |
+| mongodb.port | int | `27017` |  |
+| mongodb.image.registry | string | `"docker.io"` |  |
+| mongodb.image.repository | string | `"mongo"` |  |
+| mongodb.image.tag | string | `"4.4.6"` |  |
+| mongodb.image.pullPolicy | string | `"IfNotPresent"` |  |
+| mongodb.securityContext.enabled | bool | `true` |  |
+| mongodb.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| mongodb.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| mongodb.securityContext.privileged | bool | `false` |  |
+| mongodb.securityContext.runAsUser | int | `1001` |  |
+| mongodb.securityContext.runAsNonRoot | bool | `false` |  |
+| mongodb.resources.limits.cpu | string | `"500m"` |  |
+| mongodb.resources.limits.memory | string | `"512Mi"` |  |
+| mongodb.resources.requests.cpu | string | `"200m"` |  |
+| mongodb.resources.requests.memory | string | `"300Mi"` |  |
 
----
-
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
