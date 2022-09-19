@@ -109,7 +109,9 @@ jobs:
   update-readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Run helm-docs
         run: |
@@ -121,3 +123,4 @@ jobs:
         uses: EndBug/add-and-commit@v9.1.0
         with:
           message: "Regenerate chart README.md"
+          add: "charts/mgob/README.md"
