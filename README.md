@@ -3,7 +3,7 @@
 [![Release](https://github.com/maxisam/mgob/actions/workflows/release.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 [![Build Status](https://github.com/maxisam/mgob/actions/workflows/build.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/build.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
-![Version: 1.8.0](https://img.shields.io/badge/Version-1.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.8.6](https://img.shields.io/badge/AppVersion-1.8.6-informational?style=flat-square)
+[![GitHub release](https://img.shields.io/github/release/maxisam/mgob.svg)](https://GitHub.com/maxisam/mgob/releases/)
 
 MGOB is a MongoDB backup automation tool built with Go.
 
