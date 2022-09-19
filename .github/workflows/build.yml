@@ -106,3 +106,19 @@ jobs:
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run helm-docs
+        run: |
+          GOBIN=$PWD GO111MODULE=on go get github.com/norwoodj/helm-docs/cmd/helm-docs
+          ./helm-docs --sort-values-order file
+          rm helm-docs
+
+      - name: Commit bump
+        uses: EndBug/add-and-commit@v7
+        with:
+          branch: ${{ github.event.pull_request.base.ref }}
+          message: "Regenerate chart README.md"
