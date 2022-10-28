@@ -120,7 +120,7 @@ jobs:
           rm helm-docs
 
       - name: Commit bump
-        uses: EndBug/add-and-commit@v9.1.0
+        uses: EndBug/add-and-commit@v9.1.1
         with:
           message: "Regenerate chart README.md"
           add: "charts/mgob/README.md"
