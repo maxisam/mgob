@@ -97,10 +97,10 @@ jobs:
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
             EN_AWS_CLI=false
-            EN_AZURE=false
-            EN_GCLOUD=false
+            EN_AZURE=true
+            EN_GCLOUD=true
             EN_MINIO=true
-            EN_RCLONE=false
+            EN_RCLONE=true
             EN_GPG=false
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
