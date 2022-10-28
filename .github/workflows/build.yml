@@ -64,7 +64,7 @@ jobs:
             EN_GCLOUD=true
             EN_MINIO=true
             EN_RCLONE=true
-            EN_GPG=false
+            EN_GPG=ture
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
@@ -101,7 +101,7 @@ jobs:
             EN_GCLOUD=true
             EN_MINIO=true
             EN_RCLONE=true
-            EN_GPG=false
+            EN_GPG=ture
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
