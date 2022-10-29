@@ -59,12 +59,12 @@ jobs:
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
-            EN_AWS_CLI=false
-            EN_AZURE=false
+            EN_AWS_CLI=true
+            EN_AZURE=true
             EN_GCLOUD=false
             EN_MINIO=true
-            EN_RCLONE=false
-            EN_GPG=false
+            EN_RCLONE=true
+            EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
@@ -96,12 +96,12 @@ jobs:
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
-            EN_AWS_CLI=false
-            EN_AZURE=false
+            EN_AWS_CLI=true
+            EN_AZURE=true
             EN_GCLOUD=false
             EN_MINIO=true
-            EN_RCLONE=false
-            EN_GPG=false
+            EN_RCLONE=true
+            EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
@@ -120,7 +120,7 @@ jobs:
           rm helm-docs
 
       - name: Commit bump
-        uses: EndBug/add-and-commit@v9.1.0
+        uses: EndBug/add-and-commit@v9.1.1
         with:
           message: "Regenerate chart README.md"
           add: "charts/mgob/README.md"
