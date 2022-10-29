@@ -20,12 +20,6 @@ build:
 	    --build-arg BUILD_DATE=$(BUILD_DATE) \
 	    --build-arg VCS_REF=$(GITHUB_SHA) \
 	    --build-arg VERSION=$(APP_VERSION) \
-	    --build-arg EN_AWS_CLI=false \
-	    --build-arg EN_AZURE=true \
-	    --build-arg EN_GCLOUD=true \
-	    --build-arg EN_MINIO=true \
-	    --build-arg EN_RCLONE=true \
-	    --build-arg EN_GPG=true \
 	    -t $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION) .
 
 aws:
