@@ -35,14 +35,14 @@ jobs:
         uses: docker/build-push-action@v3
         strategy:
           matrix:
-            feature: [aws, azure, minio, rclone]
+            feature: [aws, azure, minio, gcloud, rclone]
             include:
               - feature: aws
                 arg: EN_AWS_CLI=true
               - feature: azure
                 arg: EN_AZURE=true
-              # - feature: gcloud
-              #   arg: EN_GCLOUD=true
+              - feature: gcloud
+                arg: EN_GCLOUD=true
               - feature: minio
                 arg: EN_MINIO=true
               - feature: rclone
@@ -75,7 +75,7 @@ jobs:
             VERSION=${{ env.BUILD_NUMBER }}
             EN_AWS_CLI=true
             EN_AZURE=true
-            EN_GCLOUD=false
+            EN_GCLOUD=true
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
