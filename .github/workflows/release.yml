@@ -12,6 +12,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feature: [aws, azure, minio, rclone]
+        include:
+          - feature: aws
+            arg: EN_AWS_CLI=true
+          - feature: azure
+            arg: EN_AZURE=true
+          # - feature: gcloud
+          #   arg: EN_GCLOUD=true
+          - feature: minio
+            arg: EN_MINIO=true
+          - feature: rclone
+            arg: EN_RCLONE=true
     steps:
       - uses: actions/checkout@v3
       - name: Version
@@ -33,20 +47,6 @@ jobs:
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v3
-        strategy:
-          matrix:
-            feature: [aws, azure, minio, rclone]
-            include:
-              - feature: aws
-                arg: EN_AWS_CLI=true
-              - feature: azure
-                arg: EN_AZURE=true
-              # - feature: gcloud
-              #   arg: EN_GCLOUD=true
-              - feature: minio
-                arg: EN_MINIO=true
-              - feature: rclone
-                arg: EN_RCLONE=true
         with:
           labels: ${{ env.BUILD_NUMBER }}
           push: ${{ github.event_name != 'pull_request' }}-${{ matrix.version }}
