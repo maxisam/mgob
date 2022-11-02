@@ -49,9 +49,9 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           labels: ${{ env.BUILD_NUMBER }}
-          push: ${{ github.event_name != 'pull_request' }}-${{ matrix.version }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ github.repository }}:${{ env.BUILD_NUMBER }}-${{ matrix.version }}
+            ${{ github.repository }}:${{ env.BUILD_NUMBER }}-${{ matrix.feature }}
           build-args: |
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
