@@ -29,14 +29,14 @@ jobs:
     needs: set-build-env
     strategy:
       matrix:
-        feature: [aws, azure, minio, rclone]
+        feature: [aws, azure, gcloud, minio, rclone]
         include:
           - feature: aws
             arg: EN_AWS_CLI=true
           - feature: azure
             arg: EN_AZURE=true
-          # - feature: gcloud
-          #   arg: EN_GCLOUD=true
+          - feature: gcloud
+            arg: EN_GCLOUD=true
           - feature: minio
             arg: EN_MINIO=true
           - feature: rclone
@@ -98,7 +98,7 @@ jobs:
             VERSION=${{ needs.set-build-env.outputs.buildId }}
             EN_AWS_CLI=true
             EN_AZURE=true
-            EN_GCLOUD=false
+            EN_GCLOUD=true
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
