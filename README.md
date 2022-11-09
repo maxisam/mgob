@@ -24,6 +24,7 @@ That is why I add features to my fork only.
 - Add warnOnly option to all notification channels
 - Use Github Action for CI/CD
 - New Helm Chart with metric & liveness prob & new features etc
+- Create multiple docker image releases for different backup solution
 
 ### Helm Chart
 
