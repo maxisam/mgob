@@ -45,6 +45,12 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 			return "", "", errors.Wrapf(err, "backup validation failed")
 		}
 	}
+	if plan.Target.ShutdownAfterBackup {
+		_, err := Shutdown(plan)
+		if err != nil {
+			return "", "", errors.Wrapf(err, "failed to shutdown mongo database")
+		}
+	}
 	logToFile(mlog, output)
 
 	return archive, mlog, nil

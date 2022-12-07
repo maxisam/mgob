@@ -32,14 +32,16 @@ type Validation struct {
 }
 
 type Target struct {
-	Database string `yaml:"database"`
-	Host     string `yaml:"host"`
-	Uri      string `yaml:"uri"`
-	Password string `yaml:"password"`
-	Port     int    `yaml:"port"`
-	Username string `yaml:"username"`
-	NoGzip   bool   `yaml:"noGzip"`
-	Params   string `yaml:"params"`
+	Database            string `yaml:"database"`
+	Host                string `yaml:"host"`
+	Uri                 string `yaml:"uri"`
+	Password            string `yaml:"password"`
+	Port                int    `yaml:"port"`
+	Username            string `yaml:"username"`
+	NoGzip              bool   `yaml:"noGzip"`
+	Params              string `yaml:"params"`
+	ShutdownAfterBackup bool   `yaml:"shutdownAfterBackup"`
+	ShutdownTimeoutSecs int    `yaml:"shutdownTimeoutSecs"`
 }
 
 type Scheduler struct {

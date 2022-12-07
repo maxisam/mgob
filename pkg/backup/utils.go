@@ -17,7 +17,6 @@ func BuildRestoreCmd(archive string, target config.Target, restore config.Target
 		return cmd
 	}
 	return buildCmd("mongorestore", archive, restore, "")
-
 }
 
 // command: mongodump | mongorestore
