@@ -56,7 +56,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 		}
 	}
 
-	if conf.StoragePath != "" || plan.Scheduler.Retention == 0 {
+	if conf.StoragePath != "" || plan.Scheduler.Retention != 0 {
 		localBackupOutput, err := localBackup(file, conf.StoragePath, mlog, plan)
 		if err != nil {
 			return res, err
