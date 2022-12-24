@@ -116,9 +116,10 @@ jobs:
 
       - name: Run helm-docs
         run: |
-          GOBIN=$PWD GO111MODULE=on go get github.com/norwoodj/helm-docs/cmd/helm-docs
-          ./helm-docs --sort-values-order file
-          rm helm-docs
+          curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.deb -o helm-docs.deb \
+          && sudo dpkg -i helm-docs.deb \
+          && rm helm-docs.deb \
+          && helm-docs --sort-values-order file
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9.1.1
