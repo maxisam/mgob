@@ -46,7 +46,9 @@ func (s *HttpServer) Start(version string) {
 		r.Post("/{planID}", postBackup)
 	})
 
-	FileServer(r, "/storage", http.Dir(s.Config.StoragePath))
+	if s.Config.StoragePath != "" {
+		FileServer(r, "/storage", http.Dir(s.Config.StoragePath))
+	}
 
 	log.Error(http.ListenAndServe(fmt.Sprintf("%s:%v", s.Config.Host, s.Config.Port), r))
 }
@@ -59,7 +61,7 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	fs := http.StripPrefix(path, http.FileServer(root))
 
 	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		r.Get(path, http.RedirectHandler(path+"/", http.StatusMovedPermanently).ServeHTTP)
 		path += "/"
 	}
 	path += "*"
