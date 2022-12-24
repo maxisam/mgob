@@ -25,7 +25,7 @@ That is why I add features to my fork only.
 - Use Github Action for CI/CD
 - New Helm Chart with metric & liveness prob & new features etc
 - Create multiple docker image releases for different backup solution
-- Skip local backup when retention = 0 #42
+- Skip local backup when retention = 0 [#42](https://github.com/maxisam/mgob/pull/42) Thanks @aneagoe 
 
 ### Helm Chart
 
