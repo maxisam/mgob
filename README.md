@@ -26,7 +26,8 @@ That is why I add features to my fork only.
 - New Helm Chart with metric & liveness prob & new features etc
 - Create multiple docker image releases for different backup solution
 - Skip local backup when retention = 0 [#42](https://github.com/maxisam/mgob/pull/42) Thanks @aneagoe 
-
+- Add ShutdownAfterBackup option to plan [#43](https://github.com/maxisam/mgob/pull/43) Thanks @jamesholcomb
+  (It only works with Authenticated connection)
 ### Helm Chart
 
 ```bash
