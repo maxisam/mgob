@@ -15,15 +15,13 @@ import (
 
 func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig) (Result, error) {
 	tmpPath := conf.TmpPath
-	storagePath := conf.StoragePath
+
 	t1 := time.Now()
-	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
 
 	archive, mlog, err := dump(plan, tmpPath, t1.UTC())
 	log.WithFields(log.Fields{
 		"archive": archive,
 		"mlog":    mlog,
-		"planDir": planDir,
 		"err":     err,
 	}).Info("new dump")
 
@@ -38,50 +36,32 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 		return res, err
 	}
 
-	err = sh.Command("mkdir", "-p", planDir).Run()
-	if err != nil {
-		return res, errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
-	}
-
 	fi, err := os.Stat(archive)
 	if err != nil {
 		return res, errors.Wrapf(err, "stat file %v failed", archive)
 	}
 	res.Size = fi.Size()
 
-	err = sh.Command("mv", archive, planDir).Run()
-	if err != nil {
-		return res, errors.Wrapf(err, "moving file from %v to %v failed", archive, planDir)
-	}
-
-	// check if log file exists, is not always created
-	if _, err := os.Stat(mlog); os.IsNotExist(err) {
-		log.Debug("appears no log file was generated")
-	} else {
-		err = sh.Command("mv", mlog, planDir).Run()
-		if err != nil {
-			return res, errors.Wrapf(err, "moving file from %v to %v failed", mlog, planDir)
-		}
-	}
-
-	if plan.Scheduler.Retention > 0 {
-		err = applyRetention(planDir, plan.Scheduler.Retention)
-		if err != nil {
-			return res, errors.Wrap(err, "retention job failed")
-		}
-	}
-
-	file := filepath.Join(planDir, res.Name)
+	file := archive
 
 	if plan.Encryption != nil {
-		encryptedFile := fmt.Sprintf("%v.encrypted", file)
-		output, err := encrypt(file, encryptedFile, plan, conf)
+		encryptedFile := fmt.Sprintf("%v.encrypted", archive)
+		output, err := encrypt(archive, encryptedFile, plan, conf)
 		if err != nil {
 			return res, err
 		} else {
-			removeUnencrypted(file, encryptedFile)
+			removeUnencrypted(archive, encryptedFile)
 			file = encryptedFile
 			log.WithField("plan", plan.Name).Infof("Encryption finished %v", output)
+		}
+	}
+
+	if conf.StoragePath != "" && plan.Scheduler.Retention != 0 {
+		localBackupOutput, err := localBackup(file, conf.StoragePath, mlog, plan)
+		if err != nil {
+			return res, err
+		} else {
+			log.WithField("plan", plan.Name).Infof("Local backup finished %v", localBackupOutput)
 		}
 	}
 
@@ -130,8 +110,33 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 		}
 	}
 
+	output, err := cleanup(file, mlog)
+	if err != nil {
+		return res, err
+	} else {
+		log.WithField("plan", plan.Name).Infof("Clean up temp finished %v", output)
+	}
+
 	t2 := time.Now()
 	res.Status = 200
 	res.Duration = t2.Sub(t1)
 	return res, nil
+}
+
+func cleanup(file string, mlog string) (string, error) {
+	err := sh.Command("rm", file).Run()
+	if err != nil {
+		return "", errors.Wrapf(err, "remove file from %v failed", file)
+	}
+	// check if log file exists, is not always created
+	if _, err := os.Stat(mlog); os.IsNotExist(err) {
+		log.Debug("appears no log file was generated")
+	} else {
+		err = sh.Command("rm", mlog).Run()
+		if err != nil {
+			return "", errors.Wrapf(err, "remove file from %v failed", mlog)
+		}
+	}
+	msg := fmt.Sprintf("Temp folder cleanup finished, `%v` is removed.", file)
+	return msg, nil
 }
