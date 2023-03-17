@@ -13,12 +13,13 @@ import (
 
 func gCloudUpload(file string, plan config.Plan) (string, error) {
 
-	register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v",
-		plan.GCloud.KeyFilePath)
-
-	_, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
-	if err != nil {
-		return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
+	if len(plan.GCloud.KeyFilePath) > 0 {
+		register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v",
+			plan.GCloud.KeyFilePath)
+		_, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
+		if err != nil {
+			return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
+		}
 	}
 
 	upload := fmt.Sprintf("gsutil cp %v gs://%v",
