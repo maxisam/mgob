@@ -143,7 +143,7 @@ spec:
           - key: {{ $name }}
             path: {{ $name }}
           {{- end }}
-      {{- range $secret := .Values.secret }}
+      {{- range $secret := .Values.mountSecrets }}
       - name: {{ $secret.name }}
         secret:
           secretName: {{ $secret.name }}
