@@ -1,0 +1,12 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "title": "Values schema",
+    "type": "object",
+    "properties": {
+        "replicaCount": {
+            "type": "integer",
+            "enum": [0, 1]
+        }
+    },
+    "required": ["replicaCount"]
+}
