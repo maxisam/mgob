@@ -9,9 +9,9 @@ type: application
 sources:
   - https://github.com/maxisam/mgob
 
-version: 1.8.1
+version: 1.8.2
 
-appVersion: "1.8.6"
+appVersion: "1.10.14"
 
 dependencies:
   - name: common
