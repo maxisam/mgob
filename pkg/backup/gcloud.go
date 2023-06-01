@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -22,8 +23,10 @@ func gCloudUpload(file string, plan config.Plan) (string, error) {
 		}
 	}
 
-	upload := fmt.Sprintf("gsutil cp %v gs://%v",
-		file, plan.GCloud.Bucket)
+	fileName := filepath.Base(file)
+
+	upload := fmt.Sprintf("gsutil cp %v gs://%v/%v",
+		file, plan.GCloud.Bucket, fileName)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output := ""
