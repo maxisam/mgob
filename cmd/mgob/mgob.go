@@ -5,7 +5,13 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
+	"time"
+
+	"github.com/codeskyblue/go-sh"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -88,6 +94,11 @@ func main() {
 			Usage: "logging threshold level: debug|info|warn|error|fatal|panic",
 			Value: "info",
 		},
+		cli.StringFlag{
+			Name:  "Archive,a",
+			Usage: "specify archive location to use mongo-restore instead of mongo-dump",
+			Value: "",
+		},
 	}
 	app.Run(os.Args)
 }
@@ -103,6 +114,7 @@ func start(c *cli.Context) error {
 	appConfig.StoragePath = c.String("StoragePath")
 	appConfig.TmpPath = c.String("TmpPath")
 	appConfig.DataPath = c.String("DataPath")
+	appConfig.Archive = c.String("Archive")
 	appConfig.Version = version
 
 	log.Infof("starting with config: %+v", appConfig)
@@ -136,6 +148,12 @@ func start(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	restoreDone := checkForRestore(plans)
+	if restoreDone {
+		return nil
+	}
+
 	sch := scheduler.New(plans, appConfig, modules, statusStore)
 	sch.Start()
 
@@ -155,6 +173,35 @@ func start(c *cli.Context) error {
 	log.Infof("shutting down %v signal received", sig)
 
 	return nil
+}
+
+func checkForRestore(plans []config.Plan) bool {
+	var restoreDone bool
+	for _, plan := range plans {
+		if strings.TrimSpace(plan.Archive) == "" {
+			continue
+		}
+		log.Info("Not-empty archive parameter found, starting Restore...")
+		log.Debugf("Archive parameter: %v", plan.Archive)
+
+		restoreCmd := backup.BuildRestoreCmd(plan.Archive, plan.Target, plan.Target)
+		log.Infof("Running restore command with : %v", restoreCmd)
+		output, err := sh.Command("/bin/sh", "-c", restoreCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
+		if err != nil {
+			ex := ""
+			if len(output) > 0 {
+				ex = strings.Replace(string(output), "\n", " ", -1)
+			}
+			output = nil
+			err = errors.Wrapf(err, "mongorestore log %v", ex)
+			log.Errorf("Restore procedure failed with error: %v", err)
+		} else {
+			log.Debugf("Restore command output: %v", string(output))
+			log.Info("Restore procedure finished successfully, shutting down")
+		}
+		restoreDone = true
+	}
+	return restoreDone
 }
 
 func checkClients() {

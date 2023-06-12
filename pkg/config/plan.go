@@ -25,6 +25,7 @@ type Plan struct {
 	SMTP       *SMTP       `yaml:"smtp"`
 	Slack      *Slack      `yaml:"slack"`
 	Team       *Team       `yaml:"team"`
+	Archive    string      `yaml:"archive" validate:"omitempty"`
 }
 
 type Validation struct {
