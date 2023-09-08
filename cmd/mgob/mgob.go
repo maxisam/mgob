@@ -223,6 +223,7 @@ func checkClients() {
 		}
 		log.Info(info)
 	} else {
+		appConfig.UseAwsCli = false
 		log.Info("AWS CLI is disabled.")
 	}
 
@@ -234,6 +235,7 @@ func checkClients() {
 		}
 		log.Info(info)
 	} else {
+		appConfig.HasGpg = false
 		log.Info("GPG is disabled.")
 	}
 
