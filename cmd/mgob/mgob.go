@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"os"
 	"os/signal"
 	"path"
@@ -9,8 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codeskyblue/go-sh"
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
 
 	log "github.com/sirupsen/logrus"
@@ -27,7 +27,7 @@ var (
 	appConfig = &config.AppConfig{}
 	modules   = &config.ModuleConfig{}
 	name      = "mgob"
-	version   = "v1.8.0-dev"
+	version   = "v1.9.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
