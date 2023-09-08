@@ -79,6 +79,7 @@ jobs:
           --network "host" 
           -v ${{ github.workspace }}/test/gh-actions:/config 
           -v ${{ github.workspace }}/test/backups:/storage
+          -LogLevel=debug
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
 
       - name: Verify mgob backup
@@ -91,7 +92,7 @@ jobs:
             echo "S3 integration test failed"
             exit 1
           fi
-          if [[ $logs != *"Local Backup finished"* ]]; then
+          if [[ $logs != *"Local backup finished"* ]]; then
             echo "Local backup integration test failed"
             exit 1
           fi
@@ -100,7 +101,7 @@ jobs:
       - name: Verify mgob restore
         run: |
           echo 'Restore integration test'
-          fullpath=$(find "${{ github.workspace }}/test/backups/" -type f | head -n 1)
+          fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f | head -n 1)
           if [[ $fullpath == "" ]]; then
             echo "No backup file found"
             exit 1
