@@ -86,6 +86,7 @@ jobs:
           sleep 90
           logs=$(docker logs mgob 2>&1)
           curl http://127.0.0.1:8090/version
+          echo $logs
           if [[ $logs != *"S3 upload finished"* ]]; then
             echo "S3 integration test failed"
             exit 1
