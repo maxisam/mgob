@@ -1,0 +1,9 @@
+target:
+  host: "127.0.0.1"
+  port: 27017
+  database: "test"
+archive: "/backups/backup.gz"
+scheduler:
+  cron: "*/2 * * * *"
+  retention: 5
+  timeout: 60
