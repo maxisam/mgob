@@ -12,5 +12,4 @@ type AppConfig struct {
 	Version     string `json:"version"`
 	UseAwsCli   bool   `json:"use_aws_cli"`
 	HasGpg      bool   `json:"has_gpg"`
-	Archive     string `json:"archive"`
 }
