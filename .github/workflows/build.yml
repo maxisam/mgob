@@ -109,7 +109,7 @@ jobs:
       - name: Verify mgob restore
         run: |
           echo 'Restore integration test'
-          fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f | head -n 1)
+          fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f -name "*.gz" | head -n 1)
           if [[ "$fullpath" == "" ]]; then
             echo "No backup file found"
             exit 1
