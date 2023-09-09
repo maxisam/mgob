@@ -150,17 +150,21 @@ jobs:
               echo "Failed to restore backup"
               exit 1
           fi
+
       - name: Verify metrics
         run: |
           echo 'Verify metrics'
-          if ! grep -q "mgob_backup_total{plan=\"mongo-test\".* 1" metrics.txt; then
-            echo "Metrics integration test failed"
+          # should find "mgob_scheduler_backup_total{plan="mongo-test",status="200"} 1"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"mongo-test\",status=\"200\"} 1" metrics.txt; then
+            echo "Metrics integration test failed for mongo-test"
             exit 1
           fi
-          if ! grep -q "mgob_backup_total{plan=\"no-local\".* 1" metrics.txt; then
-            echo "Metrics integration test failed"
+          # should find "mgob_scheduler_backup_total{plan="no-local",status="200"} 1"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"no-local\",status=\"200\"} 1" metrics.txt; then
+            echo "Metrics integration test failed for no-local"
             exit 1
           fi
+          
       - name: Push mgob image
         uses: docker/build-push-action@v3
         with:
