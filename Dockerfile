@@ -13,7 +13,6 @@ ARG VERSION
 
 FROM golang:1.19 as mgob-builder
 ARG VERSION
-ARG MONGODB_TOOLS_VERSION
 COPY . /go/src/github.com/stefanprodan/mgob
 WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
@@ -21,6 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
 
 FROM golang:1.19-alpine3.15 as tools-builder
 
+ARG MONGODB_TOOLS_VERSION
 RUN apk add --no-cache git build-base krb5-dev && \
     git clone https://github.com/mongodb/mongo-tools.git --depth 1 -b $MONGODB_TOOLS_VERSION
 
