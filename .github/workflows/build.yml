@@ -101,6 +101,11 @@ jobs:
           fi
           # export log to github env
           echo "MGOB_LOGS=$logs" >> $GITHUB_ENV
+      - name: Upload file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: logs.txt
       - name: Verify mgob restore
         run: |
           echo 'Restore integration test'
