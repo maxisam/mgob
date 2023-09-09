@@ -115,11 +115,8 @@ jobs:
             exit 1
           fi
           filename=$(basename -- "$fullpath")
-          fullpath="/storage/mongo-test/$filename"
-          # do url encode for the path fullpath
-          fullpath=$(echo $fullpath | sed 's/\//%2F/g')
 
-          echo "http://127.0.0.1:8090/restore/mongo-test/$fullpath"
+          echo "http://127.0.0.1:8090/restore/mongo-test/$filename"
           
           # Make the curl request and capture the status code
           status_code=$(curl -o /dev/null -s -w "%{http_code}" "http://127.0.0.1:8090/restore/mongo-test/$fullpath" -X POST)

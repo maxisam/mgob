@@ -344,17 +344,8 @@ ls /storage/mongo-test
 mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --drop
 ```
 
-Specify an `archive` parameter inside configuration: 
-```bash
-target:
-  host: "172.18.7.21"
-  port: 27017
-  database: "test"
-  username: "admin"
-  password: "secret"
-  params: "--ssl --authenticationDatabase admin"
-  noGzip: false
-archive: "/backups/backup.gz"
-```
+Use on-demand api /restore/:planID/:file to restore a backup from within mgob container.
 
-In this way mgob container will start, perform restore, then exit
+```bash
+curl -X POST http://mgob-host:8090/restore/mongo-test/mongo-test-1494056760.gz
+```
