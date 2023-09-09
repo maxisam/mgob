@@ -90,12 +90,13 @@ jobs:
           echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
           logs=$(docker logs mgob 2>&1)
           echo "$logs"
+          echo "$logs" > logs.txt
           echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
-          if ! echo "$logs" | grep -q "S3 upload finished"; then
+          if ! grep -q "S3 upload finished" logs.txt; then
             echo "S3 integration test failed"
             exit 1
           fi
-          if ! echo "$logs" | grep -q "Local backup finished"; then
+          if ! grep -q "Local backup finished" logs.txt; then
             echo "Local backup integration test failed"
             exit 1
           fi
