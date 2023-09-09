@@ -105,6 +105,11 @@ jobs:
             echo "Skip Local backup integration test failed"
             exit 1
           fi
+          # shouldn't have any files in the no-local directory
+          if [[ $(ls -A "${{ github.workspace }}/test/backups/no-local") ]]; then
+              echo "There are files in the directory."
+              exit 1
+          fi
           
          
       - name: Upload file as artifact
