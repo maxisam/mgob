@@ -22,7 +22,7 @@ var (
 	appConfig = &config.AppConfig{}
 	modules   = &config.ModuleConfig{}
 	name      = "mgob"
-	version   = "v1.11.0-dev"
+	version   = "v1.12.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {

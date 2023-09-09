@@ -1,6 +1,6 @@
 module github.com/stefanprodan/mgob
 
-go 1.19
+go 1.21
 
 require (
 	github.com/boltdb/bolt v1.3.1

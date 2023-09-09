@@ -19,14 +19,14 @@ That is why I add features to my fork only.
 - Add Retry logic for backup
 - Add MS Team notification support
 - Use github.com/jordan-wright/email for email notification for [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
-- Update Go to 1.19
+- Update Go to 1.21
 - Update other dependencies
 - Add warnOnly option to all notification channels
 - Use Github Action for CI/CD
 - New Helm Chart with metric & liveness prob & new features etc
 - Create multiple docker image releases for different backup solution
 - Skip local backup when retention = 0 [#42](https://github.com/maxisam/mgob/pull/42) Thanks @aneagoe 
-
+- Add on-demand restore API 
 ### Helm Chart
 
 ```bash
