@@ -80,23 +80,22 @@ jobs:
           -v ${{ github.workspace }}/test/gh-actions:/config 
           -v ${{ github.workspace }}/test/backups:/storage
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          -LogLevel=debug
       - name: Verify mgob backup
         run: |
           sleep 90
-          echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
+          echo `💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥`
           curl http://127.0.0.1:8090/version
-          echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
+          echo `💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥`
           curl http://127.0.0.1:8090/metrics
-          echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
+          echo `💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥`
           logs=$(docker logs mgob 2>&1)
           echo $logs
-          echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
-          if [[ "$logs" != *"S3 upload finished"* ]]; then
+          echo `💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥`
+          if [[ "$logs"!=*"S3 upload finished"* ]]; then
             echo "S3 integration test failed"
             exit 1
           fi
-          if [[ "$logs" != *"Local backup finished"* ]]; then
+          if [[ "$logs"!=*"Local backup finished"* ]]; then
             echo "Local backup integration test failed"
             exit 1
           fi
@@ -106,7 +105,7 @@ jobs:
         run: |
           echo 'Restore integration test'
           fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f | head -n 1)
-          if [[ $fullpath == "" ]]; then
+          if [[ "$fullpath" == "" ]]; then
             echo "No backup file found"
             exit 1
           fi
