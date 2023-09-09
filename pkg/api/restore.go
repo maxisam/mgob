@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/dustin/go-humanize"
 	"github.com/go-chi/chi"
@@ -18,9 +19,17 @@ func postRestore(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value("app.config").(config.AppConfig)
 	modules := r.Context().Value("app.modules").(config.ModuleConfig)
 	planID := chi.URLParam(r, "planID")
-	backupPath := chi.URLParam(r, "backupPath")
+	backupPathEncoded := chi.URLParam(r, "backupPath")
+	backupPath, err := url.QueryUnescape(backupPathEncoded)
+	if err != nil {
+		log.WithField("plan", planID).Errorf("On demand restore failed on urldecode %v", err)
+		render.Status(r, 500)
+		render.JSON(w, r, map[string]string{"error": err.Error()})
+		return
+	}
 	plan, err := config.LoadPlan(cfg.ConfigPath, planID)
 	if err != nil {
+		log.WithField("plan", planID).Errorf("On demand restore failed on load plain %v", err)
 		render.Status(r, 500)
 		render.JSON(w, r, map[string]string{"error": err.Error()})
 		return
@@ -30,7 +39,7 @@ func postRestore(w http.ResponseWriter, r *http.Request) {
 
 	res, err := restore.Run(plan, &cfg, &modules, backupPath)
 	if err != nil {
-		log.WithField("plan", planID).Errorf("On demand restore failed %v", err)
+		log.WithField("plan", planID).Errorf("On demand restore failed on restoring %v", err)
 		if err := notifier.SendNotification(fmt.Sprintf("RESTORE FAILED: %v on demand restore failed", planID),
 			err.Error(), true, plan); err != nil {
 			log.WithField("plan", plan.Name).Errorf("Notifier failed for on demand restore %v", err)

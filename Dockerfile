@@ -20,14 +20,6 @@ WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-
-# ARG MONGODB_TOOLS_VERSION
-# RUN apk add --no-cache git build-base krb5-dev && \
-#     git clone https://github.com/mongodb/mongo-tools.git --depth 1 -b $MONGODB_TOOLS_VERSION
-
-# WORKDIR mongo-tools
-# RUN ./make build
-
 FROM alpine:3.15
 ARG BUILD_DATE
 ARG VCS_REF
