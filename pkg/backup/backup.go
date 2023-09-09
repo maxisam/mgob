@@ -61,7 +61,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 		if err != nil {
 			return res, err
 		} else {
-			log.WithField("plan", plan.Name).Infof("Local backup finished %v", localBackupOutput)
+			log.WithField("plan", plan.Name).Infof("%v", localBackupOutput)
 		}
 	}
 

@@ -69,8 +69,8 @@ jobs:
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
 
       - name: Run Mgob image
         run: >
@@ -78,17 +78,58 @@ jobs:
           --name mgob 
           --network "host" 
           -v ${{ github.workspace }}/test/gh-actions:/config 
+          -v ${{ github.workspace }}/test/backups:/storage
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-
       - name: Verify mgob backup
         run: |
-          sleep 90
-          docker logs mgob
+          sleep 60
+          echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
           curl http://127.0.0.1:8090/version
-          echo 'S3 integration test'
-          docker logs mgob 2>&1 | grep 'S3 upload finished'
-          echo 'Local backup integration test'
-          docker logs mgob 2>&1 | grep 'Backup finished'
+          echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
+          curl http://127.0.0.1:8090/metrics
+          echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
+          logs=$(docker logs mgob 2>&1)
+          echo "$logs" | tee logs.txt
+          echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
+          
+          if ! grep -q "S3 upload finished" logs.txt; then
+            echo "S3 integration test failed"
+            exit 1
+          fi
+          if ! grep -q "Local backup finished" logs.txt; then
+            echo "Local backup integration test failed"
+            exit 1
+          fi
+         
+      - name: Upload file as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: logs.txt
+      - name: Verify mgob restore
+        run: |
+          echo 'Restore integration test'
+          fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f -name "*.gz" | head -n 1)
+          if [[ "$fullpath" == "" ]]; then
+            echo "No backup file found"
+            exit 1
+          fi
+          filename=$(basename -- "$fullpath")
+
+          echo "http://127.0.0.1:8090/restore/mongo-test/$filename"
+          
+          # Make the curl request and capture the status code
+          status_code=$(curl -o /dev/null -s -w "%{http_code}" "http://127.0.0.1:8090/restore/mongo-test/$filename" -X POST)
+          
+          docker logs mgob 2>&1
+          
+          # Check if the status code is 200
+          if [ "$status_code" -eq 200 ]; then
+              echo "Restore backup successfully"
+          else
+              echo "Failed to restore backup"
+              exit 1
+          fi
 
       - name: Push mgob image
         uses: docker/build-push-action@v3
@@ -105,8 +146,8 @@ jobs:
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
   update-readme:
     runs-on: ubuntu-latest
     steps:

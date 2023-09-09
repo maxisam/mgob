@@ -14,7 +14,7 @@ func Test_checkIfAnyFailure_No_Failure(t *testing.T) {
 	2022-09-15T19:18:00.096+0000	no indexes to restore for collection test_restore.test
 	2022-09-15T19:18:00.096+0000	1 document(s) restored successfully. 0 document(s) failed to restore.
 	`
-	assert.NoError(t, checkIfAnyFailure(output))
+	assert.NoError(t, CheckIfAnyFailure(output))
 }
 
 func Test_checkIfAnyFailure_No_Success(t *testing.T) {
@@ -22,7 +22,7 @@ func Test_checkIfAnyFailure_No_Success(t *testing.T) {
 	2022-09-15T17:04:00.115+0000\	preparing collections to restore from
 	2022-09-15T17:04:00.135+0000\	0 document(s) restored successfully. 0 document(s) failed to restore.
 	`
-	assert.Error(t, checkIfAnyFailure(output))
+	assert.Error(t, CheckIfAnyFailure(output))
 }
 
 func Test_checkIfAnyFailure_Failure(t *testing.T) {
@@ -35,7 +35,7 @@ func Test_checkIfAnyFailure_Failure(t *testing.T) {
 	2022-09-15T16:46:00.098+0000	finished restoring test.test (0 documents, 1 failure)
 	2022-09-15T16:46:00.098+0000	no indexes to restore for collection test.test
 	2022-09-15T16:46:00.098+0000	0 document(s) restored successfully. 1 document(s) failed to restore.`
-	assert.Error(t, checkIfAnyFailure(output))
+	assert.Error(t, CheckIfAnyFailure(output))
 }
 
 func Test_checkRetoreDatabase(t *testing.T) {

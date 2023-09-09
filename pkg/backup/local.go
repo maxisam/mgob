@@ -45,9 +45,9 @@ func localBackup(file string, storagePath string, mlog string, plan config.Plan)
 	_, filename := filepath.Split(file)
 	distPath := filepath.Join(planDir, filename)
 	t2 := time.Now()
-	msg := fmt.Sprintf("Local backup finished `%v` -> `%v` Duration: %v",
+	msg := fmt.Sprintf("Local backup finished filename:`%v`, filepath:`%v`, Duration: %v",
 		file, distPath, t2.Sub(t1))
-	return msg, nil	
+	return msg, nil
 }
 
 func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
@@ -69,11 +69,11 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	if plan.Validation != nil {
 		backupResult := getDumpedDocMap(string(output))
 		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
-			client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
+			client, ctx, err := GetMongoClient(BuildUri(plan.Validation.Database))
 			if err != nil {
 				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to get mongo client for cleanup")
 			}
-			defer dispose(client, ctx)
+			defer Dispose(client, ctx)
 			if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
 				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to clean mongo validation database")
 			}

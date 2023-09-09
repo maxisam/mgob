@@ -1,0 +1,37 @@
+name: Mongo Tool Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ""
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Read dockerfile and set env variables
+        id: dockerfile
+        run: |
+          echo "VERSION=$(grep -oP '(?<=ARG MONGODB_TOOLS_VERSION=).+' mongo-tool/Dockerfile)" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Mongo Tool image
+        uses: docker/build-push-action@v3
+        with:
+          tags: maxisam/mongo-tool:${{ env.VERSION }}
+          file: ./mongo-tool/Dockerfile
+          push: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev,mode=max
