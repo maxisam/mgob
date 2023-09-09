@@ -84,9 +84,9 @@ jobs:
         run: |
           sleep 60
           echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
-          curl http://127.0.0.1:8090/version
+          curl http://127.0.0.1:8090/version | tee version.txt
           echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
-          curl http://127.0.0.1:8090/metrics
+          curl http://127.0.0.1:8090/metrics | tee metrics.txt
           echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
           logs=$(docker logs mgob 2>&1)
           echo "$logs" | tee logs.txt
@@ -116,6 +116,16 @@ jobs:
         with:
           name: logs
           path: logs.txt
+      - name: Upload version as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: version
+          path: version.txt
+      - name: Upload metrics as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: metrics
+          path: metrics.txt
       - name: Verify mgob restore
         run: |
           echo 'Restore integration test'
@@ -141,6 +151,20 @@ jobs:
               exit 1
           fi
 
+      - name: Verify metrics
+        run: |
+          echo 'Verify metrics'
+          # should find "mgob_scheduler_backup_total{plan="mongo-test",status="200"} 1"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"mongo-test\",status=\"200\"} 1" metrics.txt; then
+            echo "Metrics integration test failed for mongo-test"
+            exit 1
+          fi
+          # should find "mgob_scheduler_backup_total{plan="no-local",status="200"} 1"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"no-local\",status=\"200\"} 1" metrics.txt; then
+            echo "Metrics integration test failed for no-local"
+            exit 1
+          fi
+          
       - name: Push mgob image
         uses: docker/build-push-action@v3
         with:
