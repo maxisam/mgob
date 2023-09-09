@@ -11,6 +11,8 @@ ARG EN_MINIO=false
 ARG EN_RCLONE=false
 ARG VERSION
 
+FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} as tools-builder
+
 FROM golang:1.19 as mgob-builder
 ARG VERSION
 COPY . /go/src/github.com/stefanprodan/mgob
@@ -18,7 +20,6 @@ WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-# FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} as tools-builder
 
 # ARG MONGODB_TOOLS_VERSION
 # RUN apk add --no-cache git build-base krb5-dev && \
@@ -60,7 +61,7 @@ COPY build.sh /tmp
 RUN /tmp/build.sh
 ENV PATH="/google-cloud-sdk/bin:${PATH}"
 COPY --from=mgob-builder /go/src/github.com/stefanprodan/mgob/mgob .
-COPY --from=maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} /go/mongo-tools/bin/* /usr/bin/
+COPY --from=tools-builder /go/mongo-tools/bin/* /usr/bin/
 
 VOLUME ["/config", "/storage", "/tmp", "/data"]
 
