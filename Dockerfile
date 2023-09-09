@@ -12,7 +12,8 @@ ARG EN_RCLONE=false
 ARG VERSION
 
 FROM golang:1.19 as mgob-builder
-
+ARG VERSION
+ARG MONGODB_TOOLS_VERSION
 COPY . /go/src/github.com/stefanprodan/mgob
 WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
