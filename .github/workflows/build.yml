@@ -83,10 +83,10 @@ jobs:
           -LogLevel=debug
       - name: Verify mgob backup
         run: |
-          curl http://127.0.0.1:8090/version
           sleep 30
           logs=$(docker logs mgob 2>&1)
           echo $logs
+          curl http://127.0.0.1:8090/version
           curl http://127.0.0.1:8090/metrics
           if [[ $logs != *"S3 upload finished"* ]]; then
             echo "S3 integration test failed"
