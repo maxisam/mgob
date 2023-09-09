@@ -1,0 +1,18 @@
+scheduler:
+  cron: "* * * * *"
+  retention: 0
+  timeout: 60
+target:
+  host: "127.0.0.1"
+  port: 27017
+  database: test
+retry:
+  attempts: 3
+  backoffFactor: 2
+
+s3:
+  url: "http://127.0.0.1:9000"
+  bucket: "backup"
+  accessKey: "AKIAIOSFODNN7EXAMPLE"
+  secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  api: "S3v4"
