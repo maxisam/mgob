@@ -96,10 +96,16 @@ jobs:
             echo "S3 integration test failed"
             exit 1
           fi
-          if ! grep -q "Local backup finished" logs.txt; then
+          if ! grep -q "Local backup finished.*plan=mongo-test" logs.txt; then
             echo "Local backup integration test failed"
             exit 1
           fi
+          # test for no-local plan
+          if grep -q "Local backup finished.*plan=no-local" logs.txt; then
+            echo "Skip Local backup integration test failed"
+            exit 1
+          fi
+          
          
       - name: Upload file as artifact
         uses: actions/upload-artifact@v3
