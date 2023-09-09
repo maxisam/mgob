@@ -18,14 +18,14 @@ WORKDIR /go/src/github.com/stefanprodan/mgob
 RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
     CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-FROM golang:1.19-alpine3.15 as tools-builder
+# FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} as tools-builder
 
-ARG MONGODB_TOOLS_VERSION
-RUN apk add --no-cache git build-base krb5-dev && \
-    git clone https://github.com/mongodb/mongo-tools.git --depth 1 -b $MONGODB_TOOLS_VERSION
+# ARG MONGODB_TOOLS_VERSION
+# RUN apk add --no-cache git build-base krb5-dev && \
+#     git clone https://github.com/mongodb/mongo-tools.git --depth 1 -b $MONGODB_TOOLS_VERSION
 
-WORKDIR mongo-tools
-RUN ./make build
+# WORKDIR mongo-tools
+# RUN ./make build
 
 FROM alpine:3.15
 ARG BUILD_DATE
@@ -60,7 +60,7 @@ COPY build.sh /tmp
 RUN /tmp/build.sh
 ENV PATH="/google-cloud-sdk/bin:${PATH}"
 COPY --from=mgob-builder /go/src/github.com/stefanprodan/mgob/mgob .
-COPY --from=tools-builder /go/mongo-tools/bin/* /usr/bin/
+COPY --from=maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} /go/mongo-tools/bin/* /usr/bin/
 
 VOLUME ["/config", "/storage", "/tmp", "/data"]
 

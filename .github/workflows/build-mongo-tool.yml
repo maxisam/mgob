@@ -30,7 +30,7 @@ jobs:
       - name: Build Mongo Tool image
         uses: docker/build-push-action@v3
         with:
-          tags: mongo-tool:${{ env.VERSION }}
+          tags: maxisam/mongo-tool:${{ env.VERSION }}
           file: ./mongo-tool/Dockerfile
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev
