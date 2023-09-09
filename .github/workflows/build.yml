@@ -96,13 +96,23 @@ jobs:
             echo "S3 integration test failed"
             exit 1
           fi
-          if ! grep -q "Local backup finished" logs.txt; then
+          if ! grep -q "Local backup finished.*plan=mongo-test" logs.txt; then
             echo "Local backup integration test failed"
             exit 1
           fi
-         
+          # test for no-local plan
+          if grep -q "Local backup finished.*plan=no-local" logs.txt; then
+            echo "Skip Local backup integration test failed"
+            exit 1
+          fi
+          # shouldn't have any files in the no-local directory
+          if [[ $(ls -A "${{ github.workspace }}/test/backups/no-local") ]]; then
+              echo "There are files in the directory."
+              exit 1
+          fi
+          
       - name: Upload file as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: logs
           path: logs.txt
