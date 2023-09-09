@@ -119,7 +119,7 @@ jobs:
           echo "http://127.0.0.1:8090/restore/mongo-test/$filename"
           
           # Make the curl request and capture the status code
-          status_code=$(curl -o /dev/null -s -w "%{http_code}" "http://127.0.0.1:8090/restore/mongo-test/$fullpath" -X POST)
+          status_code=$(curl -o /dev/null -s -w "%{http_code}" "http://127.0.0.1:8090/restore/mongo-test/$filename" -X POST)
           
           docker logs mgob 2>&1
           
