@@ -82,23 +82,24 @@ jobs:
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
       - name: Verify mgob backup
         run: |
-          sleep 90
-          echo '!!!!!!!!!!!!! Get mgob Version !!!!!!!!!!!!!'
+          sleep 60
+          echo `💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥`
           curl http://127.0.0.1:8090/version
-          echo '!!!!!!!!!!!!! Get mgob Metrics !!!!!!!!!!!!!'
-          echo '!!!!!!!!!!!!! Get mgob logs !!!!!!!!!!!!!'
+          echo `💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥`
+          curl http://127.0.0.1:8090/metrics
+          echo `💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥`
           logs=$(docker logs mgob 2>&1)
-          echo "$logs" > logs.txt
-          echo '!!!!!!!!!!!!! verify mgob backup !!!!!!!!!!!!!'
-          if ! grep -q "S3 upload finished" logs.txt; then
+          echo "$logs"
+          echo `💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥`
+          if [[ "$logs"!=*"S3 upload finished"* ]]; then
             echo "S3 integration test failed"
             exit 1
           fi
-          if ! grep -q "Local backup finished" logs.txt; then
+          if [[ "$logs"!=*"Local backup finished"* ]]; then
             echo "Local backup integration test failed"
             exit 1
           fi
-          # export log to github env
+         
       - name: Upload file as artifact
         uses: actions/upload-artifact@v2
         with:

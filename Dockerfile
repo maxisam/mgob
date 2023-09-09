@@ -9,50 +9,24 @@ ARG EN_GPG=true
 ARG GNUPG_VERSION="2.2.31-r2"
 ARG EN_MINIO=false
 ARG EN_RCLONE=false
+ARG VERSION
 
 FROM golang:1.19 as mgob-builder
 
-ARG VERSION
-
 COPY . /go/src/github.com/stefanprodan/mgob
-
 WORKDIR /go/src/github.com/stefanprodan/mgob
-
-RUN CGO_ENABLED=0 GOOS=linux \
-    go test ./pkg/...
-
-RUN CGO_ENABLED=0 GOOS=linux \
-    go build \
-    -ldflags "-X main.version=$VERSION" \
-    -a -installsuffix cgo \
-    -o mgob github.com/stefanprodan/mgob/cmd/mgob
+RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
 FROM golang:1.19-alpine3.15 as tools-builder
 
-ARG MONGODB_TOOLS_VERSION
-
-RUN apk add --no-cache git build-base krb5-dev \
-    && git clone https://github.com/mongodb/mongo-tools.git --depth 1 --branch $MONGODB_TOOLS_VERSION
+RUN apk add --no-cache git build-base krb5-dev && \
+    git clone https://github.com/mongodb/mongo-tools.git --depth 1 --branch $MONGODB_TOOLS_VERSION
 
 WORKDIR mongo-tools
 RUN ./make build
 
 FROM alpine:3.15
-
-ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
-ARG MONGODB_TOOLS_VERSION
-ARG AWS_CLI_VERSION
-ARG AZURE_CLI_VERSION
-ARG GOOGLE_CLOUD_SDK_VERSION
-ARG GNUPG_VERSION
-ARG EN_AWS_CLI
-ARG EN_AZURE
-ARG EN_GCLOUD
-ARG EN_GPG
-ARG EN_MINIO
-ARG EN_RCLONE
 
 ENV MONGODB_TOOLS_VERSION=$MONGODB_TOOLS_VERSION \
     GNUPG_VERSION=$GNUPG_VERSION \
