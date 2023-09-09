@@ -83,13 +83,13 @@ jobs:
       - name: Verify mgob backup
         run: |
           sleep 90
-          echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
+          echo '!!!!!!!!!!!!! Get mgob Version !!!!!!!!!!!!!'
           curl http://127.0.0.1:8090/version
-          echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
-          echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
+          echo '!!!!!!!!!!!!! Get mgob Metrics !!!!!!!!!!!!!'
+          echo '!!!!!!!!!!!!! Get mgob logs !!!!!!!!!!!!!'
           logs=$(docker logs mgob 2>&1)
           echo "$logs" > logs.txt
-          echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
+          echo '!!!!!!!!!!!!! verify mgob backup !!!!!!!!!!!!!'
           if ! grep -q "S3 upload finished" logs.txt; then
             echo "S3 integration test failed"
             exit 1
