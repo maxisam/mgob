@@ -114,6 +114,8 @@ jobs:
             echo "No backup file found"
             exit 1
           fi
+          filename=$(basename -- "$fullpath")
+          fullpath="/storage/mongo-test/$filename"
           # do url encode for the path fullpath
           fullpath=$(echo $fullpath | sed 's/\//%2F/g')
 
