@@ -20,9 +20,8 @@ RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
 
 FROM golang:1.19-alpine3.15 as tools-builder
 
-RUN git clone --depth 1 https://github.com/mongodb/mongo-tools.git -b $MONGODB_TOOLS_VERSION
-
-    
+RUN apk add --no-cache git build-base krb5-dev && \
+    git clone https://github.com/mongodb/mongo-tools.git --depth 1 -b $MONGODB_TOOLS_VERSION
 
 WORKDIR mongo-tools
 RUN ./make build
