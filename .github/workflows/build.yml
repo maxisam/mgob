@@ -89,7 +89,7 @@ jobs:
           curl http://127.0.0.1:8090/metrics
           echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
           logs=$(docker logs mgob 2>&1)
-          echo $logs
+          echo "$logs"
           echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
           if ! echo "$logs" | grep -q "S3 upload finished"; then
             echo "S3 integration test failed"
