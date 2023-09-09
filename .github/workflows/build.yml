@@ -79,15 +79,15 @@ jobs:
           --network "host" 
           -v ${{ github.workspace }}/test/gh-actions:/config 
           -v ${{ github.workspace }}/test/backups:/storage
-          -LogLevel=debug
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-
+          -LogLevel=debug
       - name: Verify mgob backup
         run: |
-          sleep 90
-          logs=$(docker logs mgob 2>&1)
           curl http://127.0.0.1:8090/version
+          sleep 30
+          logs=$(docker logs mgob 2>&1)
           echo $logs
+          curl http://127.0.0.1:8090/metrics
           if [[ $logs != *"S3 upload finished"* ]]; then
             echo "S3 integration test failed"
             exit 1
@@ -134,8 +134,8 @@ jobs:
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
   update-readme:
     runs-on: ubuntu-latest
     steps:
