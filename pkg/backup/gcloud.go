@@ -21,6 +21,8 @@ func gCloudUpload(file string, plan config.Plan) (string, error) {
 		if err != nil {
 			return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
 		}
+	} else {
+		return "", errors.Errorf("gcloud auth for plan %v failed, missing key file path", plan.Name)
 	}
 
 	fileName := filepath.Base(file)
