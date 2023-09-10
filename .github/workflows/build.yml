@@ -51,7 +51,7 @@ jobs:
               -v `pwd`/test/backups/sftp:/home/mgob/upload \
               --ulimit nofile=65536:65536 \
               atmoz/sftp:alpine \
-              mgob:secret:::upload
+              mgob::::upload
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
