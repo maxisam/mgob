@@ -75,7 +75,7 @@ jobs:
       - name: Setup key
         run: |
           echo "${{ secrets.GCLOUD_KEY }}" > ${{ github.workspace }}/test/gh-actions/gcloud.json
-          
+
       - name: Run Mgob image
         run: >
           docker run -d 
@@ -86,7 +86,7 @@ jobs:
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
       - name: Verify mgob backup
         run: |
-          sleep 60
+          sleep 90
           echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
           curl http://127.0.0.1:8090/version | tee version.txt
           echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
