@@ -28,7 +28,7 @@ azure:
   connectionString: BlobEndpoint
 sftp:
   host: localhost
-  port: 2222
+  port: 22
   username: mgob
   password: 
   # you can also specify path to a private key and a passphrase
