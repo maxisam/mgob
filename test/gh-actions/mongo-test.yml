@@ -22,4 +22,4 @@ s3:
   api: "S3v4"
 gcloud:
   bucket: "maxisam-mgob"
-  KeyFilePath: "/config/gcloud.json"
+  keyFilePath: "/config/gcloud.json"
