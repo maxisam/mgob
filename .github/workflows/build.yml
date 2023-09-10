@@ -29,7 +29,8 @@ jobs:
         image: atmoz/sftp:alpine
         ports:
           - 2222:22
-        command: mgob:secret:::upload
+        env:
+          SFTP_USERS: mgob:secret:::upload
 
     steps:
       - uses: actions/checkout@v3
