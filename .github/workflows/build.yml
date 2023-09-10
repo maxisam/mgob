@@ -125,7 +125,7 @@ jobs:
             exit 1
           fi
           # verify for azure
-          if ! grep -q "Azure upload finished Copying" logs.txt; then
+          if ! grep -q "Azure upload finished" logs.txt; then
             echo "Azure integration test failed, check if the connection string is expired"
             exit 1
           fi
