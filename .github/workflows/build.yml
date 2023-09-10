@@ -41,6 +41,18 @@ jobs:
           sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
 
+      - name: Setup SFTP
+        run: |
+          mkdir -p test/gh-actions/sftp/ssh
+          mkdir -p test/backups/sftp
+          ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
+          docker run \
+              -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
+              -v `pwd`/test/backups/sftp:/home/mgob/upload \ 
+              --ulimit nofile=65536:65536 \
+              -p 2222:22 -d atmoz/sftp \
+              mgob::::upload
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
