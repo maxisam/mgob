@@ -64,6 +64,8 @@ Compatibility matrix:
 | `stefanprodan/mgob:0.10` | 3.6     |
 | `stefanprodan/mgob:1.0`  | 4.0     |
 | `stefanprodan/mgob:1.1`  | 4.2     |
+| `maxisam/mgob:1.10`      | 5.0     |
+| `maxisam/mgob:1.12`      | 7.0     |
 
 Docker:
 
