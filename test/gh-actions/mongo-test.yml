@@ -30,9 +30,9 @@ sftp:
   host: localhost
   port: 2222
   username: mgob
-  password: 
+  password: secret
   # you can also specify path to a private key and a passphrase
-  private_key: /config/sftp/ssh/id_rsa
-  passphrase: 
+  # private_key: /config/sftp/ssh/id_rsa
+  # passphrase: 
   # dir must exist on the SFTP server
   dir: /upload
