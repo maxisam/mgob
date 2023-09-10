@@ -27,12 +27,12 @@ azure:
   containerName: "mgob"
   connectionString: BlobEndpoint
 sftp:
-  host: localhost
+  host: 127.0.0.1
   port: 22
   username: mgob
-  password: 
+  # password: 
   # you can also specify path to a private key and a passphrase
   private_key: /config/sftp/ssh/id_rsa
-  passphrase: 
+  # passphrase: 
   # dir must exist on the SFTP server
   dir: /upload
