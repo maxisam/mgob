@@ -46,11 +46,11 @@ jobs:
           mkdir -p test/gh-actions/sftp/ssh
           mkdir -p test/backups/sftp
           ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
-          docker run \
+          docker run -d --name sftp --network "host" \
               -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
-              -v `pwd`/test/backups/sftp:/home/mgob/upload \ 
+              -v `pwd`/test/backups/sftp:/home/mgob/upload \
               --ulimit nofile=65536:65536 \
-              -p 2222:22 -d atmoz/sftp \
+              -p 2222:22 atmoz/sftp:alpine \
               mgob::::upload
 
       - name: Set up Docker Buildx
@@ -141,7 +141,11 @@ jobs:
             echo "Azure integration test failed, check if the connection string is expired"
             exit 1
           fi
-          
+          # verify for sftp
+          if ! grep -q "SFTP upload finished" logs.txt; then
+            echo "SFTP integration test failed"
+            exit 1
+          fi
       - name: Upload file as artifact
         uses: actions/upload-artifact@v3
         with:
