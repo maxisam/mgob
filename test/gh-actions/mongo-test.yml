@@ -23,3 +23,6 @@ s3:
 gcloud:
   bucket: "maxisam-mgob"
   keyFilePath: "/config/gcloud.json"
+azure:
+  containerName: "mgob"
+  connectionString: BlobEndpoint
