@@ -72,6 +72,10 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
 
+      - name: Setup key
+        run: |
+          echo "${{ secrets.GCLOUD_KEY }}" > ${{ github.workspace }}/test/gh-actions/gcloud.json
+          
       - name: Run Mgob image
         run: >
           docker run -d 
