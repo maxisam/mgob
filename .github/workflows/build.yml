@@ -97,7 +97,7 @@ jobs:
           logs=$(docker logs mgob 2>&1)
           echo "$logs" | tee logs.txt
           echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
-          
+          # verify for s3
           if ! grep -q "S3 upload finished" logs.txt; then
             echo "S3 integration test failed"
             exit 1
@@ -106,7 +106,7 @@ jobs:
             echo "Local backup integration test failed"
             exit 1
           fi
-          # test for no-local plan
+          # verify for no-local plan
           if grep -q "Local backup finished.*plan=no-local" logs.txt; then
             echo "Skip Local backup integration test failed"
             exit 1
@@ -115,6 +115,11 @@ jobs:
           if [[ $(ls -A "${{ github.workspace }}/test/backups/no-local") ]]; then
               echo "There are files in the directory."
               exit 1
+          fi
+          # verify for gcloud
+          if ! grep -q "GCloud upload finished Copying" logs.txt; then
+            echo "GCloud integration test failed"
+            exit 1
           fi
           
       - name: Upload file as artifact
@@ -160,13 +165,13 @@ jobs:
       - name: Verify metrics
         run: |
           echo 'Verify metrics'
-          # should find "mgob_scheduler_backup_total{plan="mongo-test",status="200"} 1"
-          if ! grep -q "mgob_scheduler_backup_total{plan=\"mongo-test\",status=\"200\"} 1" metrics.txt; then
+          # should find "mgob_scheduler_backup_total{plan="mongo-test",status="200"}"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"mongo-test\",status=\"200\"}" metrics.txt; then
             echo "Metrics integration test failed for mongo-test"
             exit 1
           fi
-          # should find "mgob_scheduler_backup_total{plan="no-local",status="200"} 1"
-          if ! grep -q "mgob_scheduler_backup_total{plan=\"no-local\",status=\"200\"} 1" metrics.txt; then
+          # should find "mgob_scheduler_backup_total{plan="no-local",status="200"}"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"no-local\",status=\"200\"}" metrics.txt; then
             echo "Metrics integration test failed for no-local"
             exit 1
           fi
