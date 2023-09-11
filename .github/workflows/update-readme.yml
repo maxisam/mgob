@@ -1,0 +1,28 @@
+name: Update Helm Chart README.md
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "charts/mgob/**"
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Run helm-docs
+        run: |
+          curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.deb -o helm-docs.deb \
+          && sudo dpkg -i helm-docs.deb \
+          && rm helm-docs.deb \
+          && helm-docs --sort-values-order file
+
+      - name: Commit bump
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          message: "Regenerate chart README.md"
+          add: "charts/mgob/README.md"
