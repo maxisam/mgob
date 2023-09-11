@@ -33,6 +33,6 @@ sftp:
   # password: secret
   # you can also specify path to a private key and a passphrase
   private_key: /config/sftp/ssh/id_rsa
-  # passphrase: 
+  passphrase: YOUR_PASSPHRASE_HERE
   # dir must exist on the SFTP server
   dir: /upload

@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir -p test/gh-actions/sftp/ssh
           mkdir -p test/backups/sftp
-          ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
+          ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "YOUR_PASSPHRASE_HERE" < /dev/null
           sudo chown 1001:1001 test/backups/sftp
           docker run -d --name sftp \
               -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
