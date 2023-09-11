@@ -98,13 +98,14 @@ jobs:
       - name: Run Mgob image
         env:
           AZURE_CONNECTIONSTRING: ${{ secrets.AZURE_CONNECTIONSTRING }}
-        run: >
-          docker run -d 
-          --name mgob 
-          --network "host" 
-          -e MONGO-TEST_AZURE_CONNECTIONSTRING="$(echo $AZURE_CONNECTIONSTRING | base64 --decode)"
-          -v ${{ github.workspace }}/test/gh-actions:/config 
-          -v ${{ github.workspace }}/test/backups:/storage
+        run: |
+          decoded_secret=$(echo "$AZURE_CONNECTIONSTRING" | base64 --decode)
+          docker run -d \
+          --name mgob \
+          --network "host" \
+          -e MONGO-TEST_AZURE_CONNECTIONSTRING="$decoded_secret" \
+          -v ${{ github.workspace }}/test/gh-actions:/config \
+          -v ${{ github.workspace }}/test/backups:/storage \
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
       - name: Verify mgob backup
         run: |
