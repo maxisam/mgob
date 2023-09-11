@@ -1,10 +1,12 @@
 package config
 
 import (
+	"encoding/json"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -149,54 +151,57 @@ func LoadPlan(dir string, name string) (Plan, error) {
 }
 
 func LoadPlans(dir string) ([]Plan, error) {
-	plans := make([]Plan, 0)
-
 	// Use Go's standard lib to list all YAML files.
 	files, err := filepath.Glob(filepath.Join(dir, "*.y*ml"))
 	if err != nil {
 		return nil, errors.Wrapf(err, "Reading from %v failed", dir)
 	}
 
+	plans := make([]Plan, 0, len(files))
+	names := make(map[string]bool)
+
 	for _, path := range files {
 		var plan Plan
 		_, filename := filepath.Split(path)
-		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+		name := strings.TrimSuffix(filename, filepath.Ext(filename))
 
-		viper.Reset() // Reset viper to ensure no overlap from previous configs.
+		if names[name] {
+			continue // Skip duplicate plans
+		}
+		names[name] = true
+
+		// Set viper to read YAML configurations.
+		viper.Reset()
 		viper.SetConfigType("yaml")
 		viper.SetConfigFile(path)
-		setupViperEnv(plan.Name)
+		setupViperEnv(name)
 
+		// Try to read the config file.
 		if err := viper.ReadInConfig(); err != nil {
 			return nil, errors.Wrapf(err, "Reading %v failed", path)
 		}
 
+		// Unmarshal the read YAML into our struct.
 		if err := viper.Unmarshal(&plan); err != nil {
 			return nil, errors.Wrapf(err, "Parsing %v failed", path)
 		}
 
-		duplicate := false
-		for _, p := range plans {
-			if p.Name == plan.Name {
-				duplicate = true
-				break
+		plan.Name = name
+
+		if log.IsLevelEnabled(logrus.DebugLevel) {
+			planJSON, err := json.Marshal(plan)
+			if err != nil {
+				return nil, errors.Wrapf(err, "Marshaling %v failed", plan)
 			}
-		}
-		if duplicate {
-			continue
+
+			log.Debugf("Loaded plan %v, plan JSON: %s", plan.Name, planJSON)
 		}
 
 		plans = append(plans, plan)
 	}
 
-	if len(plans) < 1 {
+	if len(plans) == 0 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)
-	}
-	// log info  plans
-	for _, plan := range plans {
-		if plan.Azure != nil {
-			log.Infof("Plan: %v, %v", plan.Name, strings.Split(plan.Azure.ConnectionString, "sig")[0])
-		}
 	}
 
 	return plans, nil
