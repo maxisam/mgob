@@ -115,7 +115,7 @@ jobs:
           echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
           curl http://127.0.0.1:8090/version | tee version.txt
           echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
-          curl http://127.0.0.1:8090/metrics | tee metrics.txt
+          curl http://127.0.0.1:8090/metrics > metrics.txt
           echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
           logs=$(docker logs mgob 2>&1)
           echo "$logs" | tee logs.txt
