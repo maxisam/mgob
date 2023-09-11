@@ -25,12 +25,12 @@ jobs:
         env:
           MINIO_ROOT_USER: ${{ env.MINIO_ROOT_USER }}
           MINIO_ROOT_PASSWORD: ${{ env.MINIO_ROOT_PASSWORD }}
-      sftp:
-        image: atmoz/sftp:alpine
-        ports:
-          - 2222:22
-        env:
-          SFTP_USERS: mgob:secret:::upload
+      # sftp:
+      #   image: atmoz/sftp:alpine
+      #   ports:
+      #     - 2222:22
+      #   env:
+      #     SFTP_USERS: mgob:secret:::upload
 
     steps:
       - uses: actions/checkout@v3
@@ -47,17 +47,18 @@ jobs:
           sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
 
-      # - name: Setup SFTP
-      #   run: |
-      #     mkdir -p test/gh-actions/sftp/ssh
-      #     mkdir -p test/backups/sftp
-      #     ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
-      #     docker run -d --name sftp --network "host" \
-      #         -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
-      #         -v `pwd`/test/backups/sftp:/home/mgob/upload \
-      #         --ulimit nofile=65536:65536 \
-      #         atmoz/sftp:alpine \
-      #         mgob:secret:::upload
+      - name: Setup SFTP
+        run: |
+          mkdir -p test/gh-actions/sftp/ssh
+          mkdir -p test/backups/sftp
+          ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
+          docker run -d --name sftp \
+              -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
+              -v `pwd`/test/backups/sftp:/home/mgob/upload \
+              --ulimit nofile=65536:65536 \
+              -p 2222:22 \
+              atmoz/sftp:alpine \
+              mgob:secret:::upload
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
