@@ -5,7 +5,6 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
 [![GitHub release](https://img.shields.io/github/release/maxisam/mgob.svg)](https://GitHub.com/maxisam/mgob/releases/)
 
-
 **MGOB** is a MongoDB backup automation tool designed using Go. This fork introduces a variety of enhancements over the original repository by [stefanprodan](https://github.com/stefanprodan/mgob), which is set to be archived. Check out the [archival discussion here](https://github.com/stefanprodan/mgob/issues/161).
 
 > Note: New features are being added to this fork exclusively.
@@ -76,7 +75,6 @@ docker run -dp 8090:8090 --name mgob \
     stefanprodan/mgob \
     -LogLevel=info
 ```
-
 
 #### Configure
 
@@ -169,7 +167,7 @@ sftp:
   username: user
   password: secret
   # you can also specify path to a private key and a passphrase
-  private_key: /etc/ssh/ssh_host_rsa_key
+  privateKey: /etc/ssh/ssh_host_rsa_key
   passphrase: secretpassphrase
   # dir must exist on the SFTP server
   dir: backup

@@ -10,5 +10,5 @@ sftp:
   host: "127.0.0.1"
   port: 20023
   username: test
-  private_key: /etc/ssh/ssh_host_rsa_key
+  privateKey: /etc/ssh/ssh_host_rsa_key
   dir: backup

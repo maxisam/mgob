@@ -25,7 +25,7 @@ func sftpUpload(file string, plan config.Plan) (string, error) {
 	if plan.SFTP.PrivateKey != "" {
 		key, err := os.ReadFile(plan.SFTP.PrivateKey)
 		if err != nil {
-			return "", errors.Wrapf(err, "Reading private_key from file %s", plan.SFTP.PrivateKey)
+			return "", errors.Wrapf(err, "Reading privateKey from file %s", plan.SFTP.PrivateKey)
 		}
 
 		var signer ssh.Signer
