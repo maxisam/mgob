@@ -194,7 +194,9 @@ func LoadPlans(dir string) ([]Plan, error) {
 	}
 	// log info  plans
 	for _, plan := range plans {
-		log.Infof("Plan: %v, %v", plan.Name, strings.Split(plan.Azure.ConnectionString, "sig")[0])
+		if plan.Azure != nil {
+			log.Infof("Plan: %v, %v", plan.Name, strings.Split(plan.Azure.ConnectionString, "sig")[0])
+		}
 	}
 
 	return plans, nil
