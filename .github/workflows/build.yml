@@ -99,11 +99,11 @@ jobs:
         env:
           AZURE_CONNECTIONSTRING: ${{ secrets.AZURE_CONNECTIONSTRING }}
         run: |
-          decoded_secret=$(echo "$AZURE_CONNECTIONSTRING" | base64 --decode)
+          # decoded_secret=$(echo "$AZURE_CONNECTIONSTRING" | base64 --decode)
           docker run -d \
           --name mgob \
           --network "host" \
-          -e MONGO-TEST_AZURE_CONNECTIONSTRING="$decoded_secret" \
+          -e MONGO-TEST_AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
