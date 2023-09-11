@@ -132,7 +132,7 @@ func LoadPlan(dir string, name string) (Plan, error) {
 
 	// Set the name of the config file (without extension).
 	viper.SetConfigName(name)
-
+	setupViperEnv(name)
 	// Try to read the config file.
 	if err := viper.ReadInConfig(); err != nil {
 		return plan, errors.Wrapf(err, "Reading %v failed", name)
@@ -159,10 +159,13 @@ func LoadPlans(dir string) ([]Plan, error) {
 
 	for _, path := range files {
 		var plan Plan
+		_, filename := filepath.Split(path)
+		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
 
 		viper.Reset() // Reset viper to ensure no overlap from previous configs.
 		viper.SetConfigType("yaml")
 		viper.SetConfigFile(path)
+		setupViperEnv(plan.Name)
 
 		if err := viper.ReadInConfig(); err != nil {
 			return nil, errors.Wrapf(err, "Reading %v failed", path)
@@ -171,9 +174,6 @@ func LoadPlans(dir string) ([]Plan, error) {
 		if err := viper.Unmarshal(&plan); err != nil {
 			return nil, errors.Wrapf(err, "Parsing %v failed", path)
 		}
-
-		_, filename := filepath.Split(path)
-		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
 
 		duplicate := false
 		for _, p := range plans {
@@ -198,4 +198,11 @@ func LoadPlans(dir string) ([]Plan, error) {
 	}
 
 	return plans, nil
+}
+
+func setupViperEnv(planName string) {
+	// set upper case plan name as env prefix
+	viper.SetEnvPrefix(strings.ToUpper(planName))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 }
