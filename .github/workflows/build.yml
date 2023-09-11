@@ -54,7 +54,6 @@ jobs:
           ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
           docker run -d --name sftp \
               -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
-              -v `pwd`/test/backups/sftp:/home/mgob/upload \
               --ulimit nofile=65536:65536 \
               -p 2222:22 \
               atmoz/sftp:alpine \
