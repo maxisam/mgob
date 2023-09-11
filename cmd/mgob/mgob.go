@@ -127,47 +127,49 @@ func loadConfiguration(c *cli.Context) {
 func start(c *cli.Context) error {
 	log.Infof("mgob %v", version)
 
+	// Load the configuration from the command-line flags and environment variables.
 	loadConfiguration(c)
 
+	// Check if mongodump is installed and print the version information.
 	info, err := backup.CheckMongodump()
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to check mongodump")
 	log.Info(info)
 
+	// Check if all required clients are installed.
 	checkClients()
 
+	// Load the backup plans from the configuration directory.
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to load backup plans")
 
+	// Open the database store for status information.
 	store, err := db.Open(path.Join(appConfig.DataPath, "mgob.db"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	statusStore, err := db.NewStatusStore(store)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to open database store")
+	defer store.Close()
 
+	// Create a new status store for the scheduler.
+	statusStore, err := db.NewStatusStore(store)
+	handleErr(err, "Failed to create status store")
+
+	// Create a new scheduler and start it.
 	sch := scheduler.New(plans, appConfig, modules, statusStore)
 	sch.Start()
 
+	// Create a new HTTP server and start it in a separate goroutine.
 	server := &api.HttpServer{
 		Config:  appConfig,
 		Modules: modules,
 		Stats:   statusStore,
 	}
-	log.Infof("starting http server on port %v", appConfig.Port)
+	log.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start(appConfig.Version)
 
-	// wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
+	// Wait for a SIGINT (Ctrl+C) or SIGTERM (docker stop) signal.
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigChan
 
-	log.Infof("shutting down %v signal received", sig)
+	log.Infof("Shutting down (%v signal received)", sig)
 
 	return nil
 }
