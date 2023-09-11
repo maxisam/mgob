@@ -105,7 +105,7 @@ func (b backupJob) Run() {
 
 		log.WithField("plan", b.plan.Name).Info(backupLog)
 		if err := notifier.SendNotification(fmt.Sprintf("%v backup finished", b.plan.Name),
-			fmt.Sprintf("%v backup finished in %v archive size %v",
+			fmt.Sprintf("%v Backup finished in %v archive size %v",
 				res.Name, res.Duration, humanize.Bytes(uint64(res.Size))),
 			false, b.plan); err != nil {
 			log.WithField("plan", b.plan.Name).Errorf("Notifier failed %v", err)

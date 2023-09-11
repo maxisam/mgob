@@ -6,7 +6,7 @@ on:
       version:
         type: string
         description: Version
-        default: 1.12
+        default: 1.13
         required: false
 
 jobs:
