@@ -5,28 +5,26 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
 [![GitHub release](https://img.shields.io/github/release/maxisam/mgob.svg)](https://GitHub.com/maxisam/mgob/releases/)
 
-MGOB is a MongoDB backup automation tool built with Go.
 
-This is a fork from [stefanprodan](https://github.com/stefanprodan/mgob) with some additional features.
+**MGOB** is a MongoDB backup automation tool designed using Go. This fork introduces a variety of enhancements over the original repository by [stefanprodan](https://github.com/stefanprodan/mgob), which is set to be archived. Check out the [archival discussion here](https://github.com/stefanprodan/mgob/issues/161).
 
-The original author is going to archive this project. https://github.com/stefanprodan/mgob/issues/161
+> Note: New features are being added to this fork exclusively.
 
-That is why I add features to my fork only.
+## Enhancements in This Fork
 
-## New Features in this fork
-
-- Add Backup validation
-- Add Retry logic for backup
-- Add MS Team notification support
-- Use github.com/jordan-wright/email for email notification for [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
-- Update Go to 1.19
-- Update other dependencies
-- Add warnOnly option to all notification channels
-- Use Github Action for CI/CD
-- New Helm Chart with metric & liveness prob & new features etc
-- Create multiple docker image releases for different backup solution
-- Skip local backup when retention = 0 [#42](https://github.com/maxisam/mgob/pull/42) Thanks @aneagoe 
-- Add ShutdownAfterBackup option to plan [#43](https://github.com/maxisam/mgob/pull/43) Thanks @jamesholcomb
+- Backup validation
+- Retry mechanism for backups
+- MS Team notification support
+- Updated email notification mechanism addressing the [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
+- Go updated to 1.21
+- Dependencies updated
+- Introduced `warnOnly` option for all notification channels
+- Integrated Github Actions for CI/CD
+- New Helm Chart with enhanced metrics, liveness probe, and other features
+- Multiple Docker image releases catering to different backup solutions
+- Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
+- On-demand restore API
+- ShutdownAfterBackup option to plan [#43](https://github.com/maxisam/mgob/pull/43) Thanks @jamesholcomb
   (It only works with Authenticated connection)
 ### Helm Chart
 
@@ -65,6 +63,8 @@ Compatibility matrix:
 | `stefanprodan/mgob:0.10` | 3.6     |
 | `stefanprodan/mgob:1.0`  | 4.0     |
 | `stefanprodan/mgob:1.1`  | 4.2     |
+| `maxisam/mgob:1.10`      | 5.0     |
+| `maxisam/mgob:1.12`      | 7.0     |
 
 Docker:
 
@@ -78,9 +78,6 @@ docker run -dp 8090:8090 --name mgob \
     -LogLevel=info
 ```
 
-Kubernetes:
-
-A step by step guide on running MGOB as a StatefulSet with PersistentVolumeClaims can be found [here](https://github.com/stefanprodan/mgob/tree/main/k8s).
 
 #### Configure
 
@@ -345,17 +342,8 @@ ls /storage/mongo-test
 mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --drop
 ```
 
-Specify an `archive` parameter inside configuration: 
-```bash
-target:
-  host: "172.18.7.21"
-  port: 27017
-  database: "test"
-  username: "admin"
-  password: "secret"
-  params: "--ssl --authenticationDatabase admin"
-  noGzip: false
-archive: "/backups/backup.gz"
-```
+Use on-demand api /restore/:planID/:file to restore a backup from within mgob container.
 
-In this way mgob container will start, perform restore, then exit
+```bash
+curl -X POST http://mgob-host:8090/restore/mongo-test/mongo-test-1494056760.gz
+```

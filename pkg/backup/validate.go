@@ -17,19 +17,19 @@ import (
 )
 
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
-	output, err := runRestore(archive, plan)
+	output, err := RunRestore(archive, plan)
 	if err != nil {
 		log.Error("Validation: Failed to execute restore command. restore failed, cleaning up")
 		return false, errors.Wrapf(err, "failed to execute restore command")
 	}
-	if err := checkIfAnyFailure(string(output)); err != nil {
+	if err := CheckIfAnyFailure(string(output)); err != nil {
 		return false, errors.Wrapf(err, "failed to restore backup")
 	}
-	client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
-	defer dispose(client, ctx)
+	client, ctx, err := GetMongoClient(BuildUri(plan.Validation.Database))
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get mongo client")
 	}
+	defer Dispose(client, ctx)
 	collectionNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get collection names")
@@ -44,7 +44,7 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 	return true, nil
 }
 
-func checkIfAnyFailure(output string) error {
+func CheckIfAnyFailure(output string) error {
 	numberOfFailedCaptureRegex := `(\d+)\sdocument\(s\)\srestored\ssuccessfully\.\s(\d+)\sdocument\(s\)\sfailed`
 	reg := regexp.MustCompile(numberOfFailedCaptureRegex)
 	matches := reg.FindStringSubmatch(output)
@@ -56,7 +56,7 @@ func checkIfAnyFailure(output string) error {
 	return nil
 }
 
-func dispose(client *mongo.Client, ctx context.Context) {
+func Dispose(client *mongo.Client, ctx context.Context) {
 	if err := client.Disconnect(ctx); err != nil {
 		panic(err)
 	}
@@ -86,7 +86,7 @@ func checkRetoreDatabase(backupResult map[string]string, collectionNames []strin
 	return nil
 }
 
-func runRestore(archive string, plan config.Plan) ([]byte, error) {
+func RunRestore(archive string, plan config.Plan) ([]byte, error) {
 	restoreCmd := BuildRestoreCmd(archive, plan.Target, plan.Validation.Database)
 	log.Infof("Validation: restore backup with : %v", restoreCmd)
 	output, err := sh.Command("/bin/sh", "-c", restoreCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
@@ -109,7 +109,7 @@ func cleanMongo(dbName string, client *mongo.Client) error {
 	return nil
 }
 
-func getMongoClient(uri string) (*mongo.Client, context.Context, error) {
+func GetMongoClient(uri string) (*mongo.Client, context.Context, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Infof("Validation: connect to %v", uri)

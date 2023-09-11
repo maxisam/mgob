@@ -25,7 +25,6 @@ type Plan struct {
 	SMTP       *SMTP       `yaml:"smtp"`
 	Slack      *Slack      `yaml:"slack"`
 	Team       *Team       `yaml:"team"`
-	Archive    string      `yaml:"archive" validate:"omitempty"`
 }
 
 type Validation struct {
@@ -73,7 +72,7 @@ type S3 struct {
 	SecretKey    string `yaml:"secretKey"`
 	URL          string `yaml:"url"`
 	KmsKeyId     string `yaml:"kmsKeyId"`
-	StorageClass string `yaml:"storageClass" validate:"omitempty,oneof=STANDARD REDUCED_REDUNDANCY STANDARD_IA ONE-ZONE_IA INTELLIGENT_TIERING GLACIER DEEP_ARCHIVE`
+	StorageClass string `yaml:"storageClass" validate:"omitempty,oneof=STANDARD REDUCED_REDUNDANCY STANDARD_IA ONE-ZONE_IA INTELLIGENT_TIERING GLACIER DEEP_ARCHIVE"`
 }
 
 type GCloud struct {

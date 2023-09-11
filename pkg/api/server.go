@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -28,6 +29,7 @@ func (s *HttpServer) Start(version string) {
 	}
 
 	r.Mount("/metrics", metricsRouter())
+
 	r.Mount("/debug", middleware.Profiler())
 
 	r.Route("/version", func(r chi.Router) {
@@ -44,6 +46,11 @@ func (s *HttpServer) Start(version string) {
 	r.Route("/backup", func(r chi.Router) {
 		r.Use(configCtx(*s.Config, *s.Modules))
 		r.Post("/{planID}", postBackup)
+	})
+
+	r.Route("/restore", func(r chi.Router) {
+		r.Use(configCtx(*s.Config, *s.Modules))
+		r.Post("/{planID}/{backupPath}", postRestore)
 	})
 
 	if s.Config.StoragePath != "" {
@@ -69,4 +76,14 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
 	}))
+}
+
+func configCtx(data config.AppConfig, modules config.ModuleConfig) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(context.WithValue(r.Context(), "app.config", data))
+			r = r.WithContext(context.WithValue(r.Context(), "app.modules", modules))
+			next.ServeHTTP(w, r)
+		})
+	}
 }

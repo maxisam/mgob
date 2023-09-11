@@ -14,7 +14,7 @@ jobs:
       MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     services:
       mongodb:
-        image: mongo:4.2.8
+        image: mongo:7.0.1
         ports:
           - 27017:27017
       minio:
@@ -40,6 +40,20 @@ jobs:
           sudo chmod u+x /usr/bin/mc
           sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
+
+      - name: Setup SFTP
+        run: |
+          mkdir -p test/gh-actions/sftp/ssh
+          mkdir -p test/backups/sftp
+          ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "YOUR_PASSPHRASE_HERE" < /dev/null
+          sudo chown 1001:1001 test/backups/sftp
+          docker run -d --name sftp \
+              -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
+              -v `pwd`/test/backups/sftp:/home/mgob/upload \
+              --ulimit nofile=65536:65536 \
+              -p 2222:22 \
+              atmoz/sftp:alpine \
+              mgob:secret:1001::upload
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -69,8 +83,17 @@ jobs:
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
+
+      - name: Setup key
+        env:
+          GCLOUD_KEY: ${{ secrets.GCLOUD_KEY }}
+          AZURE_CONNECTIONSTRING: ${{ secrets.AZURE_CONNECTIONSTRING }}
+        run: |
+          echo "$GCLOUD_KEY" | base64 --decode > ${{ github.workspace }}/test/gh-actions/gcloud.json
+          decoded_secret=$(echo "$AZURE_CONNECTIONSTRING" | base64 --decode)
+          sed -i "s|BlobEndpoint|$decoded_secret|g" ${{ github.workspace }}/test/gh-actions/mongo-test.yml
 
       - name: Run Mgob image
         run: >
@@ -78,18 +101,107 @@ jobs:
           --name mgob 
           --network "host" 
           -v ${{ github.workspace }}/test/gh-actions:/config 
+          -v ${{ github.workspace }}/test/backups:/storage
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-
       - name: Verify mgob backup
         run: |
           sleep 90
-          docker logs mgob
-          curl http://127.0.0.1:8090/version
-          echo 'S3 integration test'
-          docker logs mgob 2>&1 | grep 'S3 upload finished'
-          echo 'Local backup integration test'
-          docker logs mgob 2>&1 | grep 'Backup finished'
+          echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
+          curl http://127.0.0.1:8090/version | tee version.txt
+          echo '💥💥💥💥💥💥💥💥 Get mgob Metrics 💥💥💥💥💥💥💥💥💥💥'
+          curl http://127.0.0.1:8090/metrics > metrics.txt
+          echo '💥💥💥💥💥💥💥💥 Get mgob logs 💥💥💥💥💥💥💥💥💥💥'
+          logs=$(docker logs mgob 2>&1)
+          echo "$logs" | tee logs.txt
+          echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
+          # verify for s3
+          if ! grep -q "S3 upload finished" logs.txt; then
+            echo "S3 integration test failed"
+            exit 1
+          fi
+          if ! grep -q "Local backup finished.*plan=mongo-test" logs.txt; then
+            echo "Local backup integration test failed"
+            exit 1
+          fi
+          # verify for no-local plan
+          if grep -q "Local backup finished.*plan=no-local" logs.txt; then
+            echo "Skip Local backup integration test failed"
+            exit 1
+          fi
+          # shouldn't have any files in the no-local directory
+          if [[ $(ls -A "${{ github.workspace }}/test/backups/no-local") ]]; then
+              echo "There are files in the directory."
+              exit 1
+          fi
+          # verify for gcloud
+          if ! grep -q "GCloud upload finished Copying" logs.txt; then
+            echo "GCloud integration test failed"
+            exit 1
+          fi
+          # verify for azure
+          if ! grep -q "Azure upload finished" logs.txt; then
+            echo "Azure integration test failed, check if the connection string is expired"
+            exit 1
+          fi
+          # verify for sftp
+          if ! grep -q "SFTP upload finished" logs.txt; then
+            echo "SFTP integration test failed"
+            exit 1
+          fi
+      - name: Upload file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: logs.txt
+      - name: Upload version as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: version
+          path: version.txt
+      - name: Upload metrics as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: metrics
+          path: metrics.txt
+      - name: Verify mgob restore
+        run: |
+          echo 'Restore integration test'
+          fullpath=$(find "${{ github.workspace }}/test/backups/mongo-test" -type f -name "*.gz" | head -n 1)
+          if [[ "$fullpath" == "" ]]; then
+            echo "No backup file found"
+            exit 1
+          fi
+          filename=$(basename -- "$fullpath")
 
+          echo "http://127.0.0.1:8090/restore/mongo-test/$filename"
+          
+          # Make the curl request and capture the status code
+          status_code=$(curl -o /dev/null -s -w "%{http_code}" "http://127.0.0.1:8090/restore/mongo-test/$filename" -X POST)
+          
+          docker logs mgob 2>&1
+          
+          # Check if the status code is 200
+          if [ "$status_code" -eq 200 ]; then
+              echo "Restore backup successfully"
+          else
+              echo "Failed to restore backup"
+              exit 1
+          fi
+
+      - name: Verify metrics
+        run: |
+          echo 'Verify metrics'
+          # should find "mgob_scheduler_backup_total{plan="mongo-test",status="200"}"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"mongo-test\",status=\"200\"}" metrics.txt; then
+            echo "Metrics integration test failed for mongo-test"
+            exit 1
+          fi
+          # should find "mgob_scheduler_backup_total{plan="no-local",status="200"}"
+          if ! grep -q "mgob_scheduler_backup_total{plan=\"no-local\",status=\"200\"}" metrics.txt; then
+            echo "Metrics integration test failed for no-local"
+            exit 1
+          fi
+          
       - name: Push mgob image
         uses: docker/build-push-action@v3
         with:
@@ -105,24 +217,5 @@ jobs:
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache,mode=max
-  update-readme:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Run helm-docs
-        run: |
-          curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.deb -o helm-docs.deb \
-          && sudo dpkg -i helm-docs.deb \
-          && rm helm-docs.deb \
-          && helm-docs --sort-values-order file
-
-      - name: Commit bump
-        uses: EndBug/add-and-commit@v9.1.1
-        with:
-          message: "Regenerate chart README.md"
-          add: "charts/mgob/README.md"
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
