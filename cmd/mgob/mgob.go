@@ -98,9 +98,13 @@ func main() {
 	app.Run(os.Args)
 }
 
-func start(c *cli.Context) error {
-	log.Infof("mgob %v", version)
+func handleErr(err error, message string) {
+	if err != nil {
+		log.Fatalf("%s: %+v", message, err)
+	}
+}
 
+func loadConfiguration(c *cli.Context) {
 	appConfig.LogLevel = c.String("LogLevel")
 	appConfig.JSONLog = c.Bool("JSONLog")
 	appConfig.Port = c.Int("Port")
@@ -114,12 +118,16 @@ func start(c *cli.Context) error {
 	log.Infof("starting with config: %+v", appConfig)
 
 	err := envconfig.Process(name, modules)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	handleErr(err, "Error processing environment configuration")
 
 	appConfig.UseAwsCli = true
 	appConfig.HasGpg = true
+}
+
+func start(c *cli.Context) error {
+	log.Infof("mgob %v", version)
+
+	loadConfiguration(c)
 
 	info, err := backup.CheckMongodump()
 	if err != nil {
