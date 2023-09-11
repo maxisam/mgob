@@ -192,9 +192,9 @@ func LoadPlans(dir string) ([]Plan, error) {
 	if len(plans) < 1 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)
 	}
-	// log info all plans
+	// log info  plans
 	for _, plan := range plans {
-		log.Infof("Plan: %v", plan)
+		log.Infof("Plan: %v, %v", plan.Name, strings.Split(plan.Azure.ConnectionString, "sig")[0])
 	}
 
 	return plans, nil
