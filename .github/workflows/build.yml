@@ -52,12 +52,14 @@ jobs:
           mkdir -p test/gh-actions/sftp/ssh
           mkdir -p test/backups/sftp
           ssh-keygen -t rsa -b 4096 -f test/gh-actions/sftp/ssh/id_rsa -q -N "" < /dev/null
+          sudo chown 1001:1001 test/backups/sftp
           docker run -d --name sftp \
               -v `pwd`/test/gh-actions/sftp/ssh/id_rsa.pub:/home/mgob/.ssh/keys/id_rsa.pub:ro \
+              -v `pwd`/test/backups/sftp:/home/mgob/upload \
               --ulimit nofile=65536:65536 \
               -p 2222:22 \
               atmoz/sftp:alpine \
-              mgob:secret:::upload
+              mgob:secret:1001::upload
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
