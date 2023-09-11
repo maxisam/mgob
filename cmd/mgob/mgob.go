@@ -4,9 +4,11 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/viper"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -39,6 +41,9 @@ func beforeApp(c *cli.Context) error {
 	}
 
 	log.Debug("log level set to ", c.GlobalString("LogLevel"))
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 	return nil
 }
 

@@ -1,13 +1,11 @@
 package config
 
 import (
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
+	"github.com/spf13/viper"
 )
 
 type Plan struct {
@@ -124,61 +122,55 @@ type Slack struct {
 
 func LoadPlan(dir string, name string) (Plan, error) {
 	plan := Plan{}
-	planPath := ""
-	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if strings.Contains(path, name+".yml") || strings.Contains(path, name+".yaml") {
-			planPath = path
-		}
-		return nil
-	})
 
-	if err != nil {
-		return plan, errors.Wrapf(err, "Reading from %v failed", dir)
+	// Set viper to read YAML configurations.
+	viper.SetConfigType("yaml")
+
+	// Set the paths to look for the config file in.
+	viper.AddConfigPath(dir)
+
+	// Set the name of the config file (without extension).
+	viper.SetConfigName(name)
+
+	// Try to read the config file.
+	if err := viper.ReadInConfig(); err != nil {
+		return plan, errors.Wrapf(err, "Reading %v failed", name)
 	}
 
-	if len(planPath) < 1 {
-		return plan, errors.Errorf("Plan %v not found", name)
+	// Unmarshal the read YAML into our struct.
+	if err := viper.Unmarshal(&plan); err != nil {
+		return plan, errors.Wrapf(err, "Parsing %v failed", name)
 	}
 
-	data, err := ioutil.ReadFile(planPath)
-	if err != nil {
-		return plan, errors.Wrapf(err, "Reading %v failed", planPath)
-	}
-
-	if err := yaml.Unmarshal(data, &plan); err != nil {
-		return plan, errors.Wrapf(err, "Parsing %v failed", planPath)
-	}
-	_, filename := filepath.Split(planPath)
-	plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+	plan.Name = name
 
 	return plan, nil
 }
 
 func LoadPlans(dir string) ([]Plan, error) {
-	files := []string{}
-	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if strings.Contains(path, "yml") || strings.Contains(path, "yaml") {
-			files = append(files, path)
-		}
-		return nil
-	})
+	plans := make([]Plan, 0)
 
+	// Use Go's standard lib to list all YAML files.
+	files, err := filepath.Glob(filepath.Join(dir, "*.y*ml"))
 	if err != nil {
 		return nil, errors.Wrapf(err, "Reading from %v failed", dir)
 	}
 
-	plans := make([]Plan, 0)
-
 	for _, path := range files {
 		var plan Plan
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
+
+		viper.Reset() // Reset viper to ensure no overlap from previous configs.
+		viper.SetConfigType("yaml")
+		viper.SetConfigFile(path)
+
+		if err := viper.ReadInConfig(); err != nil {
 			return nil, errors.Wrapf(err, "Reading %v failed", path)
 		}
 
-		if err := yaml.Unmarshal(data, &plan); err != nil {
+		if err := viper.Unmarshal(&plan); err != nil {
 			return nil, errors.Wrapf(err, "Parsing %v failed", path)
 		}
+
 		_, filename := filepath.Split(path)
 		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
 
@@ -194,8 +186,8 @@ func LoadPlans(dir string) ([]Plan, error) {
 		}
 
 		plans = append(plans, plan)
-
 	}
+
 	if len(plans) < 1 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)
 	}
