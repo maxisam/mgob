@@ -25,12 +25,6 @@ jobs:
         env:
           MINIO_ROOT_USER: ${{ env.MINIO_ROOT_USER }}
           MINIO_ROOT_PASSWORD: ${{ env.MINIO_ROOT_PASSWORD }}
-      # sftp:
-      #   image: atmoz/sftp:alpine
-      #   ports:
-      #     - 2222:22
-      #   env:
-      #     SFTP_USERS: mgob:secret:::upload
 
     steps:
       - uses: actions/checkout@v3
