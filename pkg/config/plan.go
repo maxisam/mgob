@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -190,6 +191,10 @@ func LoadPlans(dir string) ([]Plan, error) {
 
 	if len(plans) < 1 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)
+	}
+	// log info all plans
+	for _, plan := range plans {
+		log.Infof("Plan: %v", plan)
 	}
 
 	return plans, nil
