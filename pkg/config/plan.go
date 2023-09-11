@@ -126,9 +126,6 @@ type Slack struct {
 func LoadPlan(dir string, name string) (Plan, error) {
 	plan := Plan{}
 
-	// Set viper to read YAML configurations.
-	viper.SetConfigType("yaml")
-
 	// Set the paths to look for the config file in.
 	viper.AddConfigPath(dir)
 
@@ -172,7 +169,6 @@ func LoadPlans(dir string) ([]Plan, error) {
 
 		// Set viper to read YAML configurations.
 		viper.Reset()
-		viper.SetConfigType("yaml")
 		viper.SetConfigFile(path)
 		setupViperEnv(name)
 
@@ -208,6 +204,7 @@ func LoadPlans(dir string) ([]Plan, error) {
 }
 
 func setupViperEnv(planName string) {
+	viper.SetConfigType("yaml")
 	// set upper case plan name as env prefix
 	viper.SetEnvPrefix(strings.ToUpper(planName))
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
