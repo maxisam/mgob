@@ -175,67 +175,39 @@ func start(c *cli.Context) error {
 }
 
 func checkClients() {
-	if modules.MinioClient {
-		info, err := backup.CheckMinioClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Minio Client is disabled.")
+	checkClient("Minio Client", modules.MinioClient, backup.CheckMinioClient)
+	checkClient("AWS CLI", modules.AWSClient, backup.CheckAWSClient)
+	checkClient("GPG", modules.GnuPG, backup.CheckGpg)
+	checkClient("Google Storage", modules.GCloudClient, backup.CheckGCloudClient)
+	checkClient("Azure Storage", modules.AzureClient, backup.CheckAzureClient)
+	checkClient("RClone", modules.RCloneClient, backup.CheckRCloneClient)
+}
+
+func checkClient(name string, enabled bool, checkFunc func() (string, error)) {
+	if !enabled {
+		log.Infof("%s is disabled.", name)
+		disableConfig(name)
+		return
 	}
 
-	if modules.AWSClient {
-		info, err := backup.CheckAWSClient()
-		if err != nil {
+	info, err := checkFunc()
+	if err != nil {
+		if name == "AWS CLI" || name == "GPG" {
 			log.Warn(err)
-			appConfig.UseAwsCli = false
+			disableConfig(name)
+		} else {
+			log.Fatal(err)
 		}
-		log.Info(info)
 	} else {
+		log.Info(info)
+	}
+}
+
+func disableConfig(name string) {
+	switch name {
+	case "AWS CLI":
 		appConfig.UseAwsCli = false
-		log.Info("AWS CLI is disabled.")
-	}
-
-	if modules.GnuPG {
-		info, err := backup.CheckGpg()
-		if err != nil {
-			log.Warn(err)
-			appConfig.HasGpg = false
-		}
-		log.Info(info)
-	} else {
+	case "GPG":
 		appConfig.HasGpg = false
-		log.Info("GPG is disabled.")
-	}
-
-	if modules.GCloudClient {
-		info, err := backup.CheckGCloudClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Google Storage is disabled.")
-	}
-
-	if modules.AzureClient {
-		info, err := backup.CheckAzureClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Azure Storage is disabled.")
-	}
-
-	if modules.RCloneClient {
-		info, err := backup.CheckRCloneClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("RClone is disabled.")
 	}
 }
