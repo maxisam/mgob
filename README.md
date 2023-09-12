@@ -33,6 +33,10 @@ helm repo update
 helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
 ```
 
+### Breaking Changes
+
+- v2: in config, sftp.private_key -> sftp.privateKey
+
 ## Original Features
 
 - schedule backups
