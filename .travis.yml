@@ -24,6 +24,7 @@ before_script:
   - sleep 10
   - >-
     mongo test --eval 'db.test.insert({item: "item", val: "test" });'
+  - mongodump --archive=/backups/backup.gz --gzip --uri "mongodb://user:password@localhost:27017" --db test --authenticationDatabase admin
   - sudo mc config host add local http://127.0.0.1:9000 AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
   - sudo mc mb local/backup
 
@@ -40,6 +41,8 @@ script:
   - docker logs mgob 2>&1 | grep 'Backup finished'
   - echo 'SFTP private key authorization integration test'
   - docker logs mgob 2>&1 | grep "Backup finished .* sftp-authorization-test"
+  - echo 'Restore integration test'
+  - docker logs mgob 2>&1 | grep "restore procedure finished successfully, shutting down"
 
 after_success:
   - if [ -z "$DOCKER_USER" ]; then

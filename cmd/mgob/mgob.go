@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
+
+	"github.com/kelseyhightower/envconfig"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -21,7 +22,7 @@ var (
 	appConfig = &config.AppConfig{}
 	modules   = &config.ModuleConfig{}
 	name      = "mgob"
-	version   = "v1.8.0-dev"
+	version   = "v1.12.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -136,6 +137,7 @@ func start(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	sch := scheduler.New(plans, appConfig, modules, statusStore)
 	sch.Start()
 
@@ -176,6 +178,7 @@ func checkClients() {
 		}
 		log.Info(info)
 	} else {
+		appConfig.UseAwsCli = false
 		log.Info("AWS CLI is disabled.")
 	}
 
@@ -187,6 +190,7 @@ func checkClients() {
 		}
 		log.Info(info)
 	} else {
+		appConfig.HasGpg = false
 		log.Info("GPG is disabled.")
 	}
 

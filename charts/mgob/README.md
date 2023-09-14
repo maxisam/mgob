@@ -1,50 +1,144 @@
 # mgob
 
-![Version: 1.8.4](https://img.shields.io/badge/Version-1.2.1-informational?style=flat-square) ![AppVersion: 1.3](https://img.shields.io/badge/AppVersion-1.3-informational?style=flat-square)
+![Version: 1.8.2](https://img.shields.io/badge/Version-1.8.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.10.14](https://img.shields.io/badge/AppVersion-1.10.14-informational?style=flat-square)
 
-MongoDB dockerized backup agent.
+A Helm chart for Mgob,  MongoDB dockerized backup agent.
 Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
-
-## Maintainers
-
-| Name   | Email                      | Url |
-| ------ | -------------------------- | --- |
-| endrec | endre.czirbesz@rungway.com |     |
 
 ## Source Code
 
-- <https://github.com/stefanprodan/mgob>
+* <https://github.com/maxisam/mgob>
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://charts.bitnami.com/bitnami | common | 1.x.x |
 
 ## Values
 
-| Key                        | Type   | Default                                                                                   | Description                                                                                                |
-| -------------------------- | ------ | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ---- | ---- | ----- | ----- | --------------------------------------------------- |
-| config                     | object | `{}`                                                                                      | Backup plans. For details, see [values.yaml](values.yaml)                                                  |
-| env                        | object | `{}`                                                                                      |                                                                                                            |
-| fullnameOverride           | string | `""`                                                                                      |                                                                                                            |
-| image.pullPolicy           | string | `"IfNotPresent"`                                                                          | Image pull policy                                                                                          |
-| image.repository           | string | `"stefanprodan/mgob"`                                                                     | Image repo                                                                                                 |
-| image.tag                  | string | `""`                                                                                      | Image tag Overrides the image tag whose default is the chart appVersion.                                   |
-| ingress.annotations        | object | `{}`                                                                                      |                                                                                                            |
-| ingress.enabled            | bool   | `false`                                                                                   |                                                                                                            |
-| ingress.hosts              | object | `{}`                                                                                      |                                                                                                            |
-| ingress.tls                | object | `{}`                                                                                      |                                                                                                            |
-| logLevel                   | string | `"info"`                                                                                  | log level (debug                                                                                           | info | warn | error | fatal | panic) WARNING! debug logs might include passwords! |
-| nameOverride               | string | `""`                                                                                      |                                                                                                            |
-| podSecurityContext         | object | `{"fsGroup":65534}`                                                                       | Pod Security Context ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/       |
-| replicaCount               | int    | `1`                                                                                       | Number of replicas                                                                                         |
-| resources                  | object | `{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}`   | Resource requests and limits ref: http://kubernetes.io/docs/user-guide/compute-resources/                  |
-| secret                     | object | `{}`                                                                                      | Secret(s) to mount. For details, see [values.yaml](values.yaml)                                            |
-| securityContext            | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false}`   | Container Security Context ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ |
-| service.externalPort       | int    | `8090`                                                                                    | Port to access the service                                                                                 |
-| service.internalPort       | int    | `8090`                                                                                    | Port to connect to in pod                                                                                  |
-| service.name               | string | `"mgob"`                                                                                  | Service name                                                                                               |
-| serviceAccount.annotations | object | `{}`                                                                                      | Annotations to add on service account                                                                      |
-| serviceAccount.create      | bool   | `true`                                                                                    | If false, default service account will be used                                                             |
-| serviceAccount.name        | string | `""`                                                                                      |                                                                                                            |
-| storage.longTerm           | object | `{"accessMode":"ReadWriteOnce","name":"mgob-storage","size":"10Gi","storageClass":"gp2"}` | Persistent volume for backups, see `config.retention`                                                      |
-| storage.tmp                | object | `{"accessMode":"ReadWriteOnce","name":"mgob-tmp","size":"3Gi","storageClass":"gp2"}`      | Persistent volume for temporary files                                                                      |
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| kubeVersion | string | `""` |  |
+| nameOverride | string | `""` |  |
+| fullnameOverride | string | `""` |  |
+| namespaceOverride | string | `""` |  |
+| commonLabels | object | `{}` |  |
+| commonAnnotations.app | string | `"mgob"` |  |
+| clusterDomain | string | `"cluster.local"` |  |
+| logLevel | string | `"info"` |  |
+| image.registry | string | `"docker.io"` |  |
+| image.repository | string | `"maxisam/mgob"` |  |
+| image.tag | string | `"latest"` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.pullSecrets | list | `[]` |  |
+| secrets | object | `{}` |  |
+| mountSecrets | list | `[]` |  |
+| env | list | `[]` |  |
+| config | object | `{}` | Backup plans. For details, see [values.yaml](values.yaml) |
+| replicaCount | int | `1` |  |
+| sidecars | list | `[]` |  |
+| lifecycleHooks | object | `{}` |  |
+| podAnnotations | object | `{}` |  |
+| podLabels | object | `{}` |  |
+| updateStrategy.type | string | `"RollingUpdate"` |  |
+| podAffinityPreset | string | `""` |  |
+| podAntiAffinityPreset | string | `"soft"` |  |
+| nodeAffinityPreset.type | string | `""` |  |
+| nodeAffinityPreset.key | string | `""` |  |
+| nodeAffinityPreset.values | list | `[]` |  |
+| affinity | object | `{}` |  |
+| nodeSelector | object | `{}` |  |
+| tolerations | list | `[]` |  |
+| resources.limits.cpu | string | `"500m"` |  |
+| resources.limits.memory | string | `"256Mi"` |  |
+| resources.requests.cpu | string | `"100m"` |  |
+| resources.requests.memory | string | `"128Mi"` |  |
+| podSecurityContext.fsGroup | int | `65534` |  |
+| containerSecurityContext.enabled | bool | `false` |  |
+| containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
+| containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| containerSecurityContext.privileged | bool | `false` |  |
+| containerSecurityContext.runAsUser | int | `0` |  |
+| containerSecurityContext.runAsNonRoot | bool | `false` |  |
+| livenessProbe.enabled | bool | `true` |  |
+| livenessProbe.initialDelaySeconds | int | `5` |  |
+| livenessProbe.timeoutSeconds | int | `1` |  |
+| livenessProbe.periodSeconds | int | `20` |  |
+| livenessProbe.failureThreshold | int | `6` |  |
+| livenessProbe.successThreshold | int | `1` |  |
+| readinessProbe.enabled | bool | `true` |  |
+| readinessProbe.initialDelaySeconds | int | `5` |  |
+| readinessProbe.timeoutSeconds | int | `1` |  |
+| readinessProbe.periodSeconds | int | `20` |  |
+| readinessProbe.failureThreshold | int | `6` |  |
+| readinessProbe.successThreshold | int | `1` |  |
+| startupProbe.enabled | bool | `true` |  |
+| startupProbe.initialDelaySeconds | int | `10` |  |
+| startupProbe.timeoutSeconds | int | `1` |  |
+| startupProbe.periodSeconds | int | `20` |  |
+| startupProbe.failureThreshold | int | `6` |  |
+| startupProbe.successThreshold | int | `1` |  |
+| customLivenessProbe | object | `{}` |  |
+| customStartupProbe | object | `{}` |  |
+| customReadinessProbe | object | `{}` |  |
+| service.type | string | `"ClusterIP"` |  |
+| service.ports.http | int | `8090` |  |
+| service.nodePorts.http | string | `""` |  |
+| service.clusterIP | string | `""` |  |
+| service.extraPorts | list | `[]` |  |
+| service.loadBalancerIP | string | `""` |  |
+| service.loadBalancerSourceRanges | list | `[]` |  |
+| service.externalTrafficPolicy | string | `"Cluster"` |  |
+| service.annotations | object | `{}` |  |
+| service.sessionAffinity | string | `"None"` |  |
+| service.sessionAffinityConfig | object | `{}` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.pathType | string | `"Prefix"` |  |
+| ingress.apiVersion | string | `""` |  |
+| ingress.hostname | string | `"mgob.local"` |  |
+| ingress.path | string | `"/"` |  |
+| ingress.annotations | object | `{}` |  |
+| ingress.tls | bool | `false` |  |
+| ingress.tlsSecretName | string | `""` |  |
+| ingress.extraPaths | list | `[]` |  |
+| ingress.selfSigned | bool | `false` |  |
+| ingress.ingressClassName | string | `"nginx"` |  |
+| ingress.extraHosts | list | `[]` |  |
+| ingress.extraTls | list | `[]` |  |
+| ingress.secrets | list | `[]` |  |
+| ingress.extraRules | list | `[]` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automountServiceAccountToken | bool | `true` |  |
+| metrics.serviceMonitor.enabled | bool | `true` |  |
+| metrics.serviceMonitor.port | string | `"http"` |  |
+| metrics.serviceMonitor.namespace | string | `""` |  |
+| metrics.serviceMonitor.interval | string | `"30s"` |  |
+| metrics.serviceMonitor.scrapeTimeout | string | `"10s"` |  |
+| storage.longTerm | object | `{"name":"mgob-storage","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"100Gi"}},"storageClassName":"standard"}}` | Persistent volume for backups, see `config.retention` |
+| storage.tmp | object | `{"name":"mgob-tmp","spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"10Gi"}},"storageClassName":"standard"}}` | Persistent volume for temporary files |
+| storage.restoreTmp.name | string | `"mgob-restore-tmp"` |  |
+| storage.restoreTmp.spec.accessModes[0] | string | `"ReadWriteOnce"` |  |
+| storage.restoreTmp.spec.resources.requests.storage | string | `"100Gi"` |  |
+| storage.restoreTmp.spec.storageClassName | string | `"standard"` |  |
+| mongodb.enabled | bool | `true` |  |
+| mongodb.port | int | `27017` |  |
+| mongodb.image.registry | string | `"docker.io"` |  |
+| mongodb.image.repository | string | `"mongo"` |  |
+| mongodb.image.tag | string | `"4.4.6"` |  |
+| mongodb.image.pullPolicy | string | `"IfNotPresent"` |  |
+| mongodb.securityContext.enabled | bool | `true` |  |
+| mongodb.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| mongodb.securityContext.capabilities.drop[0] | string | `"ALL"` |  |
+| mongodb.securityContext.privileged | bool | `false` |  |
+| mongodb.securityContext.runAsUser | int | `1001` |  |
+| mongodb.securityContext.runAsNonRoot | bool | `false` |  |
+| mongodb.resources.limits.cpu | string | `"500m"` |  |
+| mongodb.resources.limits.memory | string | `"512Mi"` |  |
+| mongodb.resources.requests.cpu | string | `"200m"` |  |
+| mongodb.resources.requests.memory | string | `"300Mi"` |  |
 
----
-
-Autogenerated from chart metadata using [helm-docs v1.6.0](https://github.com/norwoodj/helm-docs/releases/v1.6.0)
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

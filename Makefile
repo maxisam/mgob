@@ -9,6 +9,7 @@ BUILD_DATE:=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 #run vars
 CONFIG:=$$(pwd)/test/config
 TRAVIS:=$$(pwd)/test/travis
+BACKUP_FOLDER:=$$(pwd)/test/backups
 
 # go tools
 PACKAGES:=$(shell go list ./... | grep -v '/vendor/')
@@ -76,6 +77,7 @@ ci:
 	@docker run -d --net=host --name mgob \
 	    --restart unless-stopped \
 	    -v "$(TRAVIS):/config" \
+		-v "$(BACKUP_FOLDER):/backups" \
 	    -v "/tmp/ssh_host_rsa_key:/etc/ssh/ssh_host_rsa_key:ro" \
 	    -v "/tmp/ssh_host_rsa_key.pub:/etc/ssh/ssh_host_rsa_key.pub:ro" \
         $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION).$(GITHUB_RUN_NUMBER) \
@@ -107,6 +109,17 @@ run:
 		-TmpPath=/tmp \
 		-LogLevel=info
 
+restore: 
+	@echo ">>> Starting mgob container"
+	@docker run -dp 8090:8090 --name mgob-$(APP_VERSION) \
+	    -v "$(CONFIG):/config" \
+		-v "$(BACKUP_FOLDER):/backups" \
+        $(GITHUB_REPOSITORY_OWNER)/mgob:$(APP_VERSION) \
+		-ConfigPath=/config \
+		-StoragePath=/storage \
+		-TmpPath=/tmp \
+		-LogLevel=info
+
 backend:
 	@docker run -dp 20022:22 --name mgob-sftp \
 	    atmoz/sftp:alpine test:test:::backup
@@ -115,7 +128,7 @@ backend:
 	    -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
 	    minio/minio server /export
 	@mc config host add local http://localhost:20099 \
-	    AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY S3v4
+	    AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
 	@sleep 5
 	@mc mb local/backup
 

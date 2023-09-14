@@ -3,25 +3,36 @@
 [![Release](https://github.com/maxisam/mgob/actions/workflows/release.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 [![Build Status](https://github.com/maxisam/mgob/actions/workflows/build.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/build.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
+[![GitHub release](https://img.shields.io/github/release/maxisam/mgob.svg)](https://GitHub.com/maxisam/mgob/releases/)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/maxisam?label=Sponsor%20this%20project%20%E2%9D%A4%EF%B8%8F&)](https://github.com/sponsors/maxisam)
+![GitHub](https://img.shields.io/github/license/maxisam/mgob)
 
-MGOB is a MongoDB backup automation tool built with Go.
+**MGOB** is a MongoDB backup automation tool designed using Go. This fork introduces a variety of enhancements over the original repository by [stefanprodan](https://github.com/stefanprodan/mgob), which is set to be archived. Check out the [archival discussion here](https://github.com/stefanprodan/mgob/issues/161).
 
-This is a fork from [stefanprodan](https://github.com/stefanprodan/mgob) with some additional features.
+> Note: New features are being added to this fork exclusively.
 
-The original author is going to archive this project. https://github.com/stefanprodan/mgob/issues/161
+## Enhancements in This Fork
 
-That is why I add features to my fork only.
+- Backup validation
+- Retry mechanism for backups
+- MS Team notification support
+- Updated email notification mechanism addressing the [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
+- Go updated to 1.21
+- Dependencies updated
+- Introduced `warnOnly` option for all notification channels
+- Integrated Github Actions for CI/CD
+- New Helm Chart with enhanced metrics, liveness probe, and other features
+- Multiple Docker image releases catering to different backup solutions
+- Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
+- On-demand restore API
 
-## New Features in this fork
+### Helm Chart
 
-- Add Backup validation
-- Add Retry logic for backup
-- Add MS Team notification support
-- Use github.com/jordan-wright/email for email notification for [certificate issue](https://github.com/stefanprodan/mgob/issues/160)
-- Update Go to 1.19
-- Update other dependencies
-- Add warnOnly option to all notification channels
-- Use Gihub Action for CI/CD
+```bash
+helm repo add maxisam https://maxisam.github.io/mgob/
+helm repo update
+helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
+```
 
 ## Original Features
 
@@ -43,7 +54,6 @@ MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/reposit
 Supported tags:
 
 - `maxisam/mgob:latest` latest stable [release](https://github.com/maxisam/mgob/releases)
-- `maxisam/mgob:edge` main branch latest successful [build](https://github.com/maxisam/mgob/actions/workflows/release.yml)
 
 Compatibility matrix:
 
@@ -53,6 +63,8 @@ Compatibility matrix:
 | `stefanprodan/mgob:0.10` | 3.6     |
 | `stefanprodan/mgob:1.0`  | 4.0     |
 | `stefanprodan/mgob:1.1`  | 4.2     |
+| `maxisam/mgob:1.10`      | 5.0     |
+| `maxisam/mgob:1.12`      | 7.0     |
 
 Docker:
 
@@ -65,10 +77,6 @@ docker run -dp 8090:8090 --name mgob \
     stefanprodan/mgob \
     -LogLevel=info
 ```
-
-Kubernetes:
-
-A step by step guide on running MGOB as a StatefulSet with PersistentVolumeClaims can be found [here](https://github.com/stefanprodan/mgob/tree/main/k8s).
 
 #### Configure
 
@@ -314,7 +322,7 @@ mgob_scheduler_backup_latency_count{plan="mongo-test",status="500"} 4
 
 #### Restore
 
-In order to restore from a local backup you have two options:
+In order to restore from a local backup you have 3 options:
 
 Browse `mgob-host:8090/storage` to identify the backup you want to restore.
 Login to your MongoDB server and download the archive using `curl` and restore the backup with `mongorestore` command line.
@@ -332,3 +340,19 @@ docker exec -it mgob sh
 ls /storage/mongo-test
 mongorestore --gzip --archive=/storage/mongo-test/mongo-test-1494056760.gz --host mongohost:27017 --drop
 ```
+
+Use on-demand api /restore/:planID/:file to restore a backup from within mgob container.
+
+```bash
+curl -X POST http://mgob-host:8090/restore/mongo-test/mongo-test-1494056760.gz
+```
+
+## Special Thanks
+
+- [stefanprodan](https://github.com/stefanprodan) for the original repository
+- [<img src=".etc/deranged.svg" width="45" height="20" />](https://github.com/derangeddk)
+  First awesome sponsor!!
+
+## Sponsors [![GitHub Sponsors](https://img.shields.io/github/sponsors/maxisam?label=Sponsor%20this%20project%20%E2%9D%A4%EF%B8%8F&)](https://github.com/sponsors/maxisam)
+
+<!-- sponsors --><!-- sponsors -->

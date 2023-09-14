@@ -5,7 +5,7 @@ apk add --no-cache ca-certificates tzdata bash curl krb5-dev
 # Install GnuPG
 if [ "_${MGOB_EN_GPG}" = "_true" ]
 then
-  apk add gnupg=${GNUPG_VERSION}
+  apk add --no-cache gnupg=${GNUPG_VERSION}
 fi
 
 cd /tmp

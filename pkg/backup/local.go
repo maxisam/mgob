@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -14,6 +15,40 @@ import (
 
 	"github.com/stefanprodan/mgob/pkg/config"
 )
+
+func localBackup(file string, storagePath string, mlog string, plan config.Plan) (string, error) {
+	t1 := time.Now()
+	planDir := fmt.Sprintf("%v/%v", storagePath, plan.Name)
+	err := sh.Command("mkdir", "-p", planDir).Run()
+	if err != nil {
+		return "", errors.Wrapf(err, "creating dir %v in %v failed", plan.Name, storagePath)
+	}
+	err = sh.Command("cp", file, planDir).Run()
+	if err != nil {
+		return "", errors.Wrapf(err, "moving file from %v to %v failed", file, planDir)
+	}
+	// check if log file exists, is not always created
+	if _, err := os.Stat(mlog); os.IsNotExist(err) {
+		log.Debug("appears no log file was generated")
+	} else {
+		err = sh.Command("cp", mlog, planDir).Run()
+		if err != nil {
+			return "", errors.Wrapf(err, "moving file from %v to %v failed", mlog, planDir)
+		}
+	}
+	if plan.Scheduler.Retention > 0 {
+		err = applyRetention(planDir, plan.Scheduler.Retention)
+		if err != nil {
+			return "", errors.Wrap(err, "retention job failed")
+		}
+	}
+	_, filename := filepath.Split(file)
+	distPath := filepath.Join(planDir, filename)
+	t2 := time.Now()
+	msg := fmt.Sprintf("Local backup finished filename:`%v`, filepath:`%v`, Duration: %v",
+		file, distPath, t2.Sub(t1))
+	return msg, nil
+}
 
 func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error) {
 	retryCount := 0.0
@@ -34,11 +69,11 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	if plan.Validation != nil {
 		backupResult := getDumpedDocMap(string(output))
 		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
-			client, ctx, err := getMongoClient(BuildUri(plan.Validation.Database))
+			client, ctx, err := GetMongoClient(BuildUri(plan.Validation.Database))
 			if err != nil {
 				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to get mongo client for cleanup")
 			}
-			defer dispose(client, ctx)
+			defer Dispose(client, ctx)
 			if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
 				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to clean mongo validation database")
 			}
@@ -52,7 +87,7 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 
 func getDumpedDocMap(output string) map[string]string {
 	result := map[string]string{}
-	dbDocCapRegex := `done dumping\s\w*\.(\S*)\s\((\d*).document`
+	dbDocCapRegex := `done dumping\s[\w,-]*\.(\S*)\s\((\d*).document`
 	reg := regexp.MustCompile(dbDocCapRegex)
 	lines := strings.Split(output, "\n")
 

@@ -1,44 +1,26 @@
-ARG MONGODB_TOOLS_VERSION=100.5.4
-ARG EN_AWS_CLI=true
-ARG AWS_CLI_VERSION=1.22.46
-ARG EN_AZURE=true
-ARG AZURE_CLI_VERSION=2.32.0
-ARG EN_GCLOUD=true
-ARG GOOGLE_CLOUD_SDK_VERSION=370.0.0
+ARG MONGODB_TOOLS_VERSION=100.8.0
+ARG EN_AWS_CLI=false
+ARG AWS_CLI_VERSION=1.29.44
+ARG EN_AZURE=false
+ARG AZURE_CLI_VERSION=2.52.0
+ARG EN_GCLOUD=false
+ARG GOOGLE_CLOUD_SDK_VERSION=445.0.0
 ARG EN_GPG=true
-ARG GNUPG_VERSION="2.2.31-r0"
-ARG EN_MINIO=true
-ARG EN_RCLONE=true
-
-FROM golang:1.19 as mgob-builder
-
+ARG GNUPG_VERSION="2.4.3-r1"
+ARG EN_MINIO=false
+ARG EN_RCLONE=false
 ARG VERSION
 
+FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} as tools-builder
+
+FROM golang:1.21 as mgob-builder
+ARG VERSION
 COPY . /go/src/github.com/stefanprodan/mgob
-
 WORKDIR /go/src/github.com/stefanprodan/mgob
+RUN CGO_ENABLED=0 GOOS=linux go test ./pkg/... && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.version=$VERSION" -a -installsuffix cgo -o mgob github.com/stefanprodan/mgob/cmd/mgob
 
-RUN CGO_ENABLED=0 GOOS=linux \
-    go test ./pkg/...
-
-RUN CGO_ENABLED=0 GOOS=linux \
-    go build \
-    -ldflags "-X main.version=$VERSION" \
-    -a -installsuffix cgo \
-    -o mgob github.com/stefanprodan/mgob/cmd/mgob
-
-FROM golang:1.19-alpine3.15 as tools-builder
-
-ARG MONGODB_TOOLS_VERSION
-
-RUN apk add --no-cache git build-base krb5-dev \
-    && git clone https://github.com/mongodb/mongo-tools.git --depth 1 --branch $MONGODB_TOOLS_VERSION
-
-WORKDIR mongo-tools
-RUN ./make build
-
-FROM alpine:3.15
-
+FROM alpine:3.18
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
@@ -53,7 +35,6 @@ ARG EN_GCLOUD
 ARG EN_GPG
 ARG EN_MINIO
 ARG EN_RCLONE
-
 ENV MONGODB_TOOLS_VERSION=$MONGODB_TOOLS_VERSION \
     GNUPG_VERSION=$GNUPG_VERSION \
     GOOGLE_CLOUD_SDK_VERSION=$GOOGLE_CLOUD_SDK_VERSION \
@@ -70,7 +51,7 @@ WORKDIR /
 
 COPY build.sh /tmp
 RUN /tmp/build.sh
-
+ENV PATH="/google-cloud-sdk/bin:${PATH}"
 COPY --from=mgob-builder /go/src/github.com/stefanprodan/mgob/mgob .
 COPY --from=tools-builder /go/mongo-tools/bin/* /usr/bin/
 

@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -13,16 +14,21 @@ import (
 
 func gCloudUpload(file string, plan config.Plan) (string, error) {
 
-	register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v",
-		plan.GCloud.KeyFilePath)
-
-	_, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
-	if err != nil {
-		return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
+	if len(plan.GCloud.KeyFilePath) > 0 {
+		register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v",
+			plan.GCloud.KeyFilePath)
+		_, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
+		if err != nil {
+			return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
+		}
+	} else {
+		return "", errors.Errorf("gcloud auth for plan %v failed, missing key file path", plan.Name)
 	}
 
-	upload := fmt.Sprintf("gsutil cp %v gs://%v",
-		file, plan.GCloud.Bucket)
+	fileName := filepath.Base(file)
+
+	upload := fmt.Sprintf("gsutil cp %v gs://%v/%v",
+		file, plan.GCloud.Bucket, fileName)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	output := ""

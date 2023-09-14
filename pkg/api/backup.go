@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -15,16 +14,6 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 	"github.com/stefanprodan/mgob/pkg/notifier"
 )
-
-func configCtx(data config.AppConfig, modules config.ModuleConfig) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = r.WithContext(context.WithValue(r.Context(), "app.config", data))
-			r = r.WithContext(context.WithValue(r.Context(), "app.modules", modules))
-			next.ServeHTTP(w, r)
-		})
-	}
-}
 
 func postBackup(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value("app.config").(config.AppConfig)
