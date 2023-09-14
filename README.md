@@ -4,7 +4,8 @@
 [![Build Status](https://github.com/maxisam/mgob/actions/workflows/build.yml/badge.svg)](https://github.com/maxisam/mgob/actions/workflows/build.yml)
 [![Docker Pulls](https://img.shields.io/docker/pulls/maxisam/mgob)](https://hub.docker.com/r/maxisam/mgob/)
 [![GitHub release](https://img.shields.io/github/release/maxisam/mgob.svg)](https://GitHub.com/maxisam/mgob/releases/)
-
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/maxisam?label=Sponsor%20this%20project%20%E2%9D%A4%EF%B8%8F&)](https://github.com/sponsors/maxisam)
+![GitHub](https://img.shields.io/github/license/maxisam/mgob)
 
 **MGOB** is a MongoDB backup automation tool designed using Go. This fork introduces a variety of enhancements over the original repository by [stefanprodan](https://github.com/stefanprodan/mgob), which is set to be archived. Check out the [archival discussion here](https://github.com/stefanprodan/mgob/issues/161).
 
@@ -76,7 +77,6 @@ docker run -dp 8090:8090 --name mgob \
     stefanprodan/mgob \
     -LogLevel=info
 ```
-
 
 #### Configure
 
@@ -346,3 +346,13 @@ Use on-demand api /restore/:planID/:file to restore a backup from within mgob co
 ```bash
 curl -X POST http://mgob-host:8090/restore/mongo-test/mongo-test-1494056760.gz
 ```
+
+## Special Thanks
+
+- [stefanprodan](https://github.com/stefanprodan) for the original repository
+- [<img src=".etc/deranged.svg" width="45" height="20" />](https://github.com/derangeddk)
+  First awesome sponsor!!
+
+## Sponsors [![GitHub Sponsors](https://img.shields.io/github/sponsors/maxisam?label=Sponsor%20this%20project%20%E2%9D%A4%EF%B8%8F&)](https://github.com/sponsors/maxisam)
+
+<!-- sponsors --><!-- sponsors -->
