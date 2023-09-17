@@ -41,7 +41,7 @@ func buildCmd(command string, archive string, target config.Target, overrideDBNa
 	}
 
 	if target.Database != "" {
-		if command == "mongodump" {
+		if command == "mongodump" && target.Uri == "" {
 			cmd += fmt.Sprintf("--db %v ", target.Database)
 		} else {
 			if overrideDBName != "" {
