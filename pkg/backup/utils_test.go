@@ -61,13 +61,12 @@ func Test_BuildDumpCmd_no_uri(t *testing.T) {
 
 func Test_BuildDumpCmd_uri(t *testing.T) {
 	target := config.Target{
-		Database: "test",
-		Uri:      "mongodb://user:password@localhost:27017",
-		Params:   "--authenticationDatabase admin",
+		Uri:    "mongodb://user:password@localhost:27017/test",
+		Params: "--authenticationDatabase admin",
 	}
 
 	dumpCmd := BuildDumpCmd("test.gz", target)
-	assert.Equal(t, dumpCmd, `mongodump --archive=test.gz --gzip --uri "mongodb://user:password@localhost:27017" --db test --authenticationDatabase admin `)
+	assert.Equal(t, dumpCmd, `mongodump --archive=test.gz --gzip --uri "mongodb://user:password@localhost:27017/test" --authenticationDatabase admin `)
 }
 
 func Test_BuildUri_Username(t *testing.T) {
