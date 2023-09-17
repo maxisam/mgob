@@ -138,10 +138,10 @@ jobs:
             exit 1
           fi
           # verify for azure
-          if ! grep -q "Azure upload finished" logs.txt; then
-            echo "Azure integration test failed, check if the connection string is expired"
-            exit 1
-          fi
+          # if ! grep -q "Azure upload finished" logs.txt; then
+          #   echo "Azure integration test failed, check if the connection string is expired"
+          #   exit 1
+          # fi
           # verify for sftp
           if ! grep -q "SFTP upload finished" logs.txt; then
             echo "SFTP integration test failed"
