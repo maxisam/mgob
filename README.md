@@ -47,7 +47,7 @@ helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
 - http file server for local backups and logs
 - distributed as an Alpine Docker image
 
-#### Install
+## Installation
 
 MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/repository/docker/maxisam/mgob).
 
@@ -78,28 +78,28 @@ docker run -dp 8090:8090 --name mgob \
     -LogLevel=info
 ```
 
-#### Configure
+## Configuration
 
 Define a backup plan (yaml format) for each database you want to backup inside the `config` dir.
 The yaml file name is being used as the backup plan ID, no white spaces or special characters are allowed.
 
 [READ MORE](.document/BACKUP_PLAN.md)
 
-#### On-Demand Operations
+## On-Demand Operations
 
 MGOB exposes a set of HTTP endpoints for on-demand operations like backup, restore, status, metrics, and version.
 
 READ MORE: [On-Demand Operations](.document/ON_DEMAND_OPERATION.md)
 
-#### Logs
+## Logs
 
 READ MORE: [Logs](.document/LOGS.md)
 
-#### Metrics
+## Metrics
 
 READ MORE: [Metrics](.document/METRICS.md)
 
-#### Restore
+## Restore
 
 READ MORE: [Restore](.document/RESTORE.md)
 
