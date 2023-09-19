@@ -25,7 +25,8 @@
 - Multiple Docker image releases catering to different backup solutions
 - Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
 - On-demand restore API
-
+- ShutdownAfterBackup option to plan [#43](https://github.com/maxisam/mgob/pull/43) Thanks @jamesholcomb
+  (It only works with Authenticated connection)
 ### Helm Chart
 
 ```bash
