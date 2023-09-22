@@ -31,7 +31,7 @@ logLevel: info
 image:
   registry: docker.io
   repository: maxisam/mgob
-  tag: "latest"
+  tag: "1.12.17-all"
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
