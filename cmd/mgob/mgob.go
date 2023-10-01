@@ -4,9 +4,11 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/viper"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -22,7 +24,7 @@ var (
 	appConfig = &config.AppConfig{}
 	modules   = &config.ModuleConfig{}
 	name      = "mgob"
-	version   = "v1.12.0-dev"
+	version   = "v2.0.0-dev"
 )
 
 func beforeApp(c *cli.Context) error {
@@ -39,6 +41,9 @@ func beforeApp(c *cli.Context) error {
 	}
 
 	log.Debug("log level set to ", c.GlobalString("LogLevel"))
+
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 	return nil
 }
 
@@ -93,9 +98,13 @@ func main() {
 	app.Run(os.Args)
 }
 
-func start(c *cli.Context) error {
-	log.Infof("mgob %v", version)
+func handleErr(err error, message string) {
+	if err != nil {
+		log.Fatalf("%s: %+v", message, err)
+	}
+}
 
+func loadConfiguration(c *cli.Context) {
 	appConfig.LogLevel = c.String("LogLevel")
 	appConfig.JSONLog = c.Bool("JSONLog")
 	appConfig.Port = c.Int("Port")
@@ -109,118 +118,96 @@ func start(c *cli.Context) error {
 	log.Infof("starting with config: %+v", appConfig)
 
 	err := envconfig.Process(name, modules)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	handleErr(err, "Error processing environment configuration")
 
 	appConfig.UseAwsCli = true
 	appConfig.HasGpg = true
+}
 
+func start(c *cli.Context) error {
+	log.Infof("mgob %v", version)
+
+	// Load the configuration from the command-line flags and environment variables.
+	loadConfiguration(c)
+
+	// Check if mongodump is installed and print the version information.
 	info, err := backup.CheckMongodump()
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to check mongodump")
 	log.Info(info)
 
+	// Check if all required clients are installed.
 	checkClients()
 
+	// Load the backup plans from the configuration directory.
 	plans, err := config.LoadPlans(appConfig.ConfigPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to load backup plans")
 
+	// Open the database store for status information.
 	store, err := db.Open(path.Join(appConfig.DataPath, "mgob.db"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	statusStore, err := db.NewStatusStore(store)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleErr(err, "Failed to open database store")
+	defer store.Close()
 
+	// Create a new status store for the scheduler.
+	statusStore, err := db.NewStatusStore(store)
+	handleErr(err, "Failed to create status store")
+
+	// Create a new scheduler and start it.
 	sch := scheduler.New(plans, appConfig, modules, statusStore)
 	sch.Start()
 
+	// Create a new HTTP server and start it in a separate goroutine.
 	server := &api.HttpServer{
 		Config:  appConfig,
 		Modules: modules,
 		Stats:   statusStore,
 	}
-	log.Infof("starting http server on port %v", appConfig.Port)
+	log.Infof("Starting HTTP server on port %v", appConfig.Port)
 	go server.Start(appConfig.Version)
 
-	// wait for SIGINT (Ctrl+C) or SIGTERM (docker stop)
+	// Wait for a SIGINT (Ctrl+C) or SIGTERM (docker stop) signal.
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigChan
 
-	log.Infof("shutting down %v signal received", sig)
+	log.Infof("Shutting down (%v signal received)", sig)
 
 	return nil
 }
 
 func checkClients() {
-	if modules.MinioClient {
-		info, err := backup.CheckMinioClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Minio Client is disabled.")
+	checkClient("Minio Client", modules.MinioClient, backup.CheckMinioClient)
+	checkClient("AWS CLI", modules.AWSClient, backup.CheckAWSClient)
+	checkClient("GPG", modules.GnuPG, backup.CheckGpg)
+	checkClient("Google Storage", modules.GCloudClient, backup.CheckGCloudClient)
+	checkClient("Azure Storage", modules.AzureClient, backup.CheckAzureClient)
+	checkClient("RClone", modules.RCloneClient, backup.CheckRCloneClient)
+}
+
+func checkClient(name string, enabled bool, checkFunc func() (string, error)) {
+	if !enabled {
+		log.Infof("%s is disabled.", name)
+		disableConfig(name)
+		return
 	}
 
-	if modules.AWSClient {
-		info, err := backup.CheckAWSClient()
-		if err != nil {
+	info, err := checkFunc()
+	if err != nil {
+		if name == "AWS CLI" || name == "GPG" {
 			log.Warn(err)
-			appConfig.UseAwsCli = false
+			disableConfig(name)
+		} else {
+			log.Fatal(err)
 		}
-		log.Info(info)
 	} else {
+		log.Info(info)
+	}
+}
+
+func disableConfig(name string) {
+	switch name {
+	case "AWS CLI":
 		appConfig.UseAwsCli = false
-		log.Info("AWS CLI is disabled.")
-	}
-
-	if modules.GnuPG {
-		info, err := backup.CheckGpg()
-		if err != nil {
-			log.Warn(err)
-			appConfig.HasGpg = false
-		}
-		log.Info(info)
-	} else {
+	case "GPG":
 		appConfig.HasGpg = false
-		log.Info("GPG is disabled.")
-	}
-
-	if modules.GCloudClient {
-		info, err := backup.CheckGCloudClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Google Storage is disabled.")
-	}
-
-	if modules.AzureClient {
-		info, err := backup.CheckAzureClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("Azure Storage is disabled.")
-	}
-
-	if modules.RCloneClient {
-		info, err := backup.CheckRCloneClient()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info(info)
-	} else {
-		log.Info("RClone is disabled.")
 	}
 }

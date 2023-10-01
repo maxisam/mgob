@@ -1,13 +1,14 @@
 package config
 
 import (
-	"io/ioutil"
-	"os"
+	"encoding/json"
 	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type Plan struct {
@@ -93,7 +94,7 @@ type SFTP struct {
 	Dir        string `yaml:"dir"`
 	Host       string `yaml:"host"`
 	Password   string `yaml:"password"`
-	PrivateKey string `yaml:"private_key"`
+	PrivateKey string `yaml:"privateKey"`
 	Passphrase string `yaml:"passphrase"`
 	Port       int    `yaml:"port"`
 	Username   string `yaml:"username"`
@@ -124,81 +125,88 @@ type Slack struct {
 
 func LoadPlan(dir string, name string) (Plan, error) {
 	plan := Plan{}
-	planPath := ""
-	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if strings.Contains(path, name+".yml") || strings.Contains(path, name+".yaml") {
-			planPath = path
-		}
-		return nil
-	})
 
-	if err != nil {
-		return plan, errors.Wrapf(err, "Reading from %v failed", dir)
+	// Set the paths to look for the config file in.
+	viper.AddConfigPath(dir)
+
+	// Set the name of the config file (without extension).
+	viper.SetConfigName(name)
+	setupViperEnv(name)
+	// Try to read the config file.
+	if err := viper.ReadInConfig(); err != nil {
+		return plan, errors.Wrapf(err, "Reading %v failed", name)
 	}
 
-	if len(planPath) < 1 {
-		return plan, errors.Errorf("Plan %v not found", name)
+	// Unmarshal the read YAML into our struct.
+	if err := viper.Unmarshal(&plan); err != nil {
+		return plan, errors.Wrapf(err, "Parsing %v failed", name)
 	}
 
-	data, err := ioutil.ReadFile(planPath)
-	if err != nil {
-		return plan, errors.Wrapf(err, "Reading %v failed", planPath)
-	}
-
-	if err := yaml.Unmarshal(data, &plan); err != nil {
-		return plan, errors.Wrapf(err, "Parsing %v failed", planPath)
-	}
-	_, filename := filepath.Split(planPath)
-	plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
+	plan.Name = name
 
 	return plan, nil
 }
 
 func LoadPlans(dir string) ([]Plan, error) {
-	files := []string{}
-	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if strings.Contains(path, "yml") || strings.Contains(path, "yaml") {
-			files = append(files, path)
-		}
-		return nil
-	})
-
+	// Use Go's standard lib to list all YAML files.
+	files, err := filepath.Glob(filepath.Join(dir, "*.y*ml"))
 	if err != nil {
 		return nil, errors.Wrapf(err, "Reading from %v failed", dir)
 	}
 
-	plans := make([]Plan, 0)
+	plans := make([]Plan, 0, len(files))
+	names := make(map[string]bool)
 
 	for _, path := range files {
 		var plan Plan
-		data, err := ioutil.ReadFile(path)
-		if err != nil {
+		_, filename := filepath.Split(path)
+		name := strings.TrimSuffix(filename, filepath.Ext(filename))
+
+		if names[name] {
+			continue // Skip duplicate plans
+		}
+		names[name] = true
+
+		// Set viper to read YAML configurations.
+		viper.Reset()
+		viper.SetConfigFile(path)
+		setupViperEnv(name)
+
+		// Try to read the config file.
+		if err := viper.ReadInConfig(); err != nil {
 			return nil, errors.Wrapf(err, "Reading %v failed", path)
 		}
 
-		if err := yaml.Unmarshal(data, &plan); err != nil {
+		// Unmarshal the read YAML into our struct.
+		if err := viper.Unmarshal(&plan); err != nil {
 			return nil, errors.Wrapf(err, "Parsing %v failed", path)
 		}
-		_, filename := filepath.Split(path)
-		plan.Name = strings.TrimSuffix(filename, filepath.Ext(filename))
 
-		duplicate := false
-		for _, p := range plans {
-			if p.Name == plan.Name {
-				duplicate = true
-				break
+		plan.Name = name
+
+		if log.IsLevelEnabled(logrus.DebugLevel) {
+			planJSON, err := json.Marshal(plan)
+			if err != nil {
+				return nil, errors.Wrapf(err, "Marshaling %v failed", plan)
 			}
-		}
-		if duplicate {
-			continue
+
+			log.Debugf("Loaded plan %v, plan JSON: %s", plan.Name, planJSON)
 		}
 
 		plans = append(plans, plan)
-
 	}
-	if len(plans) < 1 {
+
+	if len(plans) == 0 {
 		return nil, errors.Errorf("No backup plans found in %v", dir)
 	}
 
 	return plans, nil
+}
+
+func setupViperEnv(planName string) {
+	viper.SetConfigType("yaml")
+	// set upper case plan name as env prefix
+	viper.SetEnvPrefix(strings.ToUpper(planName))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 }

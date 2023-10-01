@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dustin/go-humanize"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	log "github.com/sirupsen/logrus"
 

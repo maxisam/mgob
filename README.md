@@ -25,6 +25,7 @@
 - Multiple Docker image releases catering to different backup solutions
 - Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
 - On-demand restore API
+- Load config from environment variables to override config file. syntax: `PLAN-ID_KEY_PROPERTY` (e.g. `mongo-test_SMTP_SERVER=smtp.company.com`)
 
 ### Helm Chart
 
@@ -33,6 +34,10 @@ helm repo add maxisam https://maxisam.github.io/mgob/
 helm repo update
 helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
 ```
+
+### Breaking Changes
+
+- v2: in config, sftp.private_key -> sftp.privateKey
 
 ## Original Features
 

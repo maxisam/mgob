@@ -23,9 +23,9 @@ s3:
 gcloud:
   bucket: "maxisam-mgob"
   keyFilePath: "/config/gcloud.json"
-# azure:
-#   containerName: "mgob"
-#   connectionString: BlobEndpoint
+azure:
+  containerName: "mgob"
+  connectionString: BlobEndpoint
 sftp:
   host: 127.0.0.1
   port: 2222
