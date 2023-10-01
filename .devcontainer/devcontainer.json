@@ -2,14 +2,29 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/go
 {
   "name": "Go",
-  "image": "mcr.microsoft.com/devcontainers/go:0-1.21-bullseye",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/go:1-1.21-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-contrib/features/mongosh-homebrew:1": {
+      "version": "latest"
+    },
+    "ghcr.io/christophermacgown/devcontainer-features/minio-client:1": {
+      "vendor": "linux",
+      "architecture": "amd64"
+    }
+  },
 
-  // Features to add to the dev container. More info: https://containers.dev/features.
-  // "features": {},
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "go version",
 
   // Configure tool-specific properties.
   "customizations": {
-    // Configure properties specific to VS Code.
     "vscode": {
       // Set *default* container specific settings.json values on container create.
       "settings": {
@@ -28,23 +43,25 @@
             { "label": "WIP" }
           ]
         }
-      }
+      },
+      "extensions": [
+        "766b.go-outliner",
+        "eamodio.gitlens",
+        "EditorConfig.EditorConfig",
+        "GitHub.vscode-pull-request-github",
+        "golang.go",
+        "mhutchie.git-graph",
+        "ms-vscode-remote.remote-containers",
+        "nhoizey.gremlins",
+        "premparihar.gotestexplorer",
+        "rioukkevin.vscode-git-commit",
+        "yzhang.markdown-all-in-one",
+        "christian-kohler.path-intellisense",
+        "esbenp.prettier-vscode",
+        "medo64.render-crlf"
+      ]
     }
-  },
-  "extensions": [
-	"premparihar.gotestexplorer",
-	"GitHub.copilot",
-	"golang.go",
-	"nhoizey.gremlins",
-	"rioukkevin.vscode-git-commit",
-	"yzhang.markdown-all-in-one"
-],
-
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "go version"
+  }
 
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   // "remoteUser": "root"
