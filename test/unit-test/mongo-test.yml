@@ -1,0 +1,38 @@
+scheduler:
+  cron: "* * * * *"
+  retention: 5
+  timeout: 60
+target:
+  host: "127.0.0.1"
+  port: 27017
+  database: test
+retry:
+  attempts: 3
+  backoffFactor: 2
+validation:
+  database:
+    host: "127.0.0.1"
+    port: 27017
+    database: test_restore
+s3:
+  url: "http://127.0.0.1:9000"
+  bucket: "backup"
+  accessKey: "AKIAIOSFODNN7EXAMPLE"
+  secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  api: "S3v4"
+gcloud:
+  bucket: "maxisam-mgob"
+  keyFilePath: "/config/gcloud.json"
+azure:
+  containerName: "mgob"
+  connectionString: BlobEndpoint
+sftp:
+  host: 127.0.0.1
+  port: 2222
+  username: mgob
+  # password: secret
+  # you can also specify path to a private key and a passphrase
+  privateKey: /config/sftp/ssh/id_rsa
+  passphrase: YOUR_PASSPHRASE_HERE
+  # dir must exist on the SFTP server
+  dir: /upload

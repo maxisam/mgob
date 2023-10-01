@@ -13,7 +13,7 @@ func getDir(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("Failed to get current working directory: %v", err)
 	}
-	dir := filepath.Join(cwd, "../../test", "gh-actions")
+	dir := filepath.Join(cwd, "../../test", "unit-test")
 	return dir
 }
 
