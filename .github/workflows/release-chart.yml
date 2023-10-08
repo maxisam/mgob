@@ -34,5 +34,5 @@ jobs:
           path: charts/mgob
           registry: registry-1.docker.io
           registry_username: ${{ secrets.DOCKER_USERNAME }}
-          registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          registry_password: ${{ secrets.DOCKER_SECRET }}
           update_dependencies: "true"
