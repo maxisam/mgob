@@ -29,7 +29,7 @@ jobs:
         uses: appany/helm-oci-chart-releaser@v0.4.1
         with:
           name: mgob
-          repository: maxisam/mgob
+          repository: maxisam
           tag: ${{ steps.yaml.outputs.VERSION }}
           path: charts/mgob
           registry: registry-1.docker.io
