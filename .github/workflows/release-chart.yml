@@ -19,7 +19,7 @@ jobs:
       #     password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Publish chart
-        uses: rberrelleza/helm-oci-chart-releaser@v0.4.1
+        uses: appany/helm-oci-chart-releaser@v0.4.1
         with:
           name: mgob
           repository: maxisam/mgob
