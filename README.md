@@ -30,8 +30,7 @@
 ### Helm Chart
 
 ```bash
-helm repo add maxisam https://maxisam.github.io/mgob/
-helm repo update
+helm pull oci://registry-1.docker.io/maxisam/mgob --version 1.8.3
 helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
 ```
 
