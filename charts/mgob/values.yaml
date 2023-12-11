@@ -31,7 +31,7 @@ logLevel: info
 image:
   registry: docker.io
   repository: maxisam/mgob
-  tag: "1.12.17-all"
+  tag: "2.0.18-all"
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -46,7 +46,16 @@ image:
   ##
   pullSecrets: []
 
-secrets: {}
+# -- environment variables that will be created as secrets and passed to the container
+envSecrets:
+  annotations: {}
+  secrets: {}
+
+# -- Extra environment variables imported from existing secrets
+extraEnvSecrets: {}
+# ENV_NAME:
+#   secret: my-secret
+#   key: my-key
 
 mountSecrets: []
 # - name: my-secret
@@ -56,8 +65,7 @@ env: []
 #  - name: HTTPS_PROXY
 #    value: "http://localhost:3128"
 
-# -- Backup plans.
-# For details, see [values.yaml](values.yaml)
+# -- Backup plans. For details, see [BACKUP_PLAN.md](../../.document/BACKUP_PLAN.md)
 config: {}
 #    # Add each plan as per below.
 #    the-first-database.yml:

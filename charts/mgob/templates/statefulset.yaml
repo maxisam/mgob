@@ -34,11 +34,31 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote}}
         args:
           - "-LogLevel={{ .Values.logLevel }}"
+        {{- if or .Values.env .Values.envSecrets.secrets .Values.extraEnvSecrets }}
         env:
           {{- range $envVar := .Values.env }}
           - name: {{ $envVar.name }}
             value: {{ $envVar.value }}
           {{- end }}
+          {{- if .Values.envSecrets.secrets }}
+          {{- range $name, $secret := .Values.envSecrets.secrets }}
+          - name: {{ $name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $fullName }}
+                key: {{ $name }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.extraEnvSecrets }}
+          {{- range $name, $secret := .Values.extraEnvSecrets }}
+          - name: {{ $name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $secret.secret }}
+                key: {{ $secret.key }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
         ports:
           - name: http
             containerPort: {{ .Values.service.ports.http }}
@@ -137,7 +157,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ template "common.names.fullname" . }}-config
+          name: {{ template "common.names.fullname" . }}
           items:
           {{- range $name, $value := .Values.config }}
           - key: {{ $name }}
