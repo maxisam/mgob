@@ -32,12 +32,11 @@ Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrume
 | image.tag | string | `"2.0.18-all"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.pullSecrets | list | `[]` |  |
-| envSecrets.annotations | object | `{}` |  |
-| envSecrets.secrets | object | `{}` |  |
-| extraEnvSecrets | object | `{}` |  |
+| envSecrets | object | `{"annotations":{},"secrets":{}}` | environment variables that will be created as secrets and passed to the container |
+| extraEnvSecrets | object | `{}` | Extra environment variables imported from existing secrets |
 | mountSecrets | list | `[]` |  |
 | env | list | `[]` |  |
-| config | object | `{}` | Backup plans. For details, see [values.yaml](values.yaml) |
+| config | object | `{}` | Backup plans. For details, see [BACKUP_PLAN.md](../../.document/BACKUP_PLAN.md) |
 | replicaCount | int | `1` |  |
 | sidecars | list | `[]` |  |
 | lifecycleHooks | object | `{}` |  |
