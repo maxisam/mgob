@@ -39,6 +39,15 @@ spec:
           - name: {{ $envVar.name }}
             value: {{ $envVar.value }}
           {{- end }}
+          {{- if .Values.envSecrets.secrets }}
+          {{- range $name, _ := .Values.envSecrets.secrets }}
+          - name: {{ $name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $fullName }}
+                key: {{ $name }}
+          {{- end }}
+          {{- end }}
         ports:
           - name: http
             containerPort: {{ .Values.service.ports.http }}

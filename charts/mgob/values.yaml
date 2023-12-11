@@ -46,7 +46,9 @@ image:
   ##
   pullSecrets: []
 
-secrets: {}
+envSecrets:
+  annotations: {}
+  secrets: {}
 
 mountSecrets: []
 # - name: my-secret
