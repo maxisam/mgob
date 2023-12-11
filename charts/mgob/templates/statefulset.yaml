@@ -48,6 +48,15 @@ spec:
                 key: {{ $name }}
           {{- end }}
           {{- end }}
+          {{- if .Values.extraEnvSecrets }}
+          {{- range $name, $value := .Values.extraEnvSecrets }}
+          - name: {{ $name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $value.secret }}
+                key: {{ $value.key }}
+          {{- end }}
+          {{- end }}
         ports:
           - name: http
             containerPort: {{ .Values.service.ports.http }}

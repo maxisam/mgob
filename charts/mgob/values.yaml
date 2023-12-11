@@ -50,6 +50,11 @@ envSecrets:
   annotations: {}
   secrets: {}
 
+extraEnvSecrets: []
+# - ENV_NAME:
+#     secret: my-secret
+#     key: my-key
+
 mountSecrets: []
 # - name: my-secret
 
