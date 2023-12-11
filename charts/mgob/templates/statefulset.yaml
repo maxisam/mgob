@@ -34,6 +34,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote}}
         args:
           - "-LogLevel={{ .Values.logLevel }}"
+        {{- if or .Values.env .Values.envSecrets.secrets .Values.extraEnvSecrets }}
         env:
           {{- range $envVar := .Values.env }}
           - name: {{ $envVar.name }}
@@ -49,14 +50,15 @@ spec:
           {{- end }}
           {{- end }}
           {{- if .Values.extraEnvSecrets }}
-          {{- range $name, $value := .Values.extraEnvSecrets }}
+          {{- range $name, $secret := .Values.extraEnvSecrets }}
           - name: {{ $name }}
             valueFrom:
               secretKeyRef:
-                name: {{ $value.secret }}
-                key: {{ $value.key }}
+                name: {{ $secret.secret }}
+                key: {{ $secret.key }}
           {{- end }}
           {{- end }}
+        {{- end }}
         ports:
           - name: http
             containerPort: {{ .Values.service.ports.http }}
