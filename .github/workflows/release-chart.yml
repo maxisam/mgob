@@ -50,5 +50,4 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          version: 1.6.1
           mark_as_latest: true
