@@ -137,7 +137,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ template "common.names.fullname" . }}-config
+          name: {{ template "common.names.fullname" . }}
           items:
           {{- range $name, $value := .Values.config }}
           - key: {{ $name }}
