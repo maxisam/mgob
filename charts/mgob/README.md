@@ -34,7 +34,7 @@ Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrume
 | image.pullSecrets | list | `[]` |  |
 | envSecrets.annotations | object | `{}` |  |
 | envSecrets.secrets | object | `{}` |  |
-| extraEnvSecrets | list | `[]` |  |
+| extraEnvSecrets | object | `{}` |  |
 | mountSecrets | list | `[]` |  |
 | env | list | `[]` |  |
 | config | object | `{}` | Backup plans. For details, see [values.yaml](values.yaml) |
