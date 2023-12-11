@@ -1,6 +1,6 @@
 # mgob
 
-![Version: 1.8.3](https://img.shields.io/badge/Version-1.8.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.12.17](https://img.shields.io/badge/AppVersion-1.12.17-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.0.18](https://img.shields.io/badge/AppVersion-2.0.18-informational?style=flat-square)
 
 A Helm chart for Mgob,  MongoDB dockerized backup agent.
 Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrumentation with Prometheus and more.
@@ -29,10 +29,12 @@ Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrume
 | logLevel | string | `"info"` |  |
 | image.registry | string | `"docker.io"` |  |
 | image.repository | string | `"maxisam/mgob"` |  |
-| image.tag | string | `"1.12.17-all"` |  |
+| image.tag | string | `"2.0.18-all"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.pullSecrets | list | `[]` |  |
-| secrets | object | `{}` |  |
+| envSecrets.annotations | object | `{}` |  |
+| envSecrets.secrets | object | `{}` |  |
+| extraEnvSecrets | list | `[]` |  |
 | mountSecrets | list | `[]` |  |
 | env | list | `[]` |  |
 | config | object | `{}` | Backup plans. For details, see [values.yaml](values.yaml) |
