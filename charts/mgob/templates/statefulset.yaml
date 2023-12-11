@@ -40,7 +40,7 @@ spec:
             value: {{ $envVar.value }}
           {{- end }}
           {{- if .Values.envSecrets.secrets }}
-          {{- range $name, _ := .Values.envSecrets.secrets }}
+          {{- range $name, $secret := .Values.envSecrets.secrets }}
           - name: {{ $name }}
             valueFrom:
               secretKeyRef:
