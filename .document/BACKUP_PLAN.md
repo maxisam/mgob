@@ -140,3 +140,11 @@ With uri being set, host/port/username/password/database will be ignored. [Read 
 target:
   uri: "mongodb://admin:secret@localhost:27017/test?authSource=admin&ssl=true"
 ```
+
+## Overriding configuration with environment variables
+
+All configuration options can be overridden with environment variables. The format is `PLAN_NAME__SECTION_KEY`.
+
+(all uppercase, double underscore, `__`, as separator between plan name and section key)
+
+For example, to override the `scheduler.cron` option, you can set the `BACKUP_PLAN__SCHEDULER_CRON` environment variable.
