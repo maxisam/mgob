@@ -21,7 +21,7 @@ func TestLoadPlan(t *testing.T) {
 	// set env var for test
 	testConnectionString := "test-connetion-string"
 	testPlanName := "mongo-test"
-	os.Setenv(fmt.Sprintf("%s_%s_%s", strings.ToUpper(testPlanName), "AZURE", "CONNECTIONSTRING"), testConnectionString)
+	os.Setenv(fmt.Sprintf("%s__%s_%s", strings.ToUpper(strings.Replace(testPlanName, "-", "_", -1)), "AZURE", "CONNECTIONSTRING"), testConnectionString)
 	dir := getDir(t)
 	plan, err := LoadPlan(dir, testPlanName)
 
@@ -41,7 +41,7 @@ func TestLoadPlans(t *testing.T) {
 	// set env var for test
 	testConnectionString := "test-connetion-string"
 	testPlanName := "mongo-test"
-	os.Setenv(fmt.Sprintf("%s_%s_%s", strings.ToUpper(testPlanName), "AZURE", "CONNECTIONSTRING"), testConnectionString)
+	os.Setenv(fmt.Sprintf("%s__%s_%s", strings.ToUpper(strings.Replace(testPlanName, "-", "_", -1)), "AZURE", "CONNECTIONSTRING"), testConnectionString)
 	dir := getDir(t)
 
 	plans, err := LoadPlans(dir)

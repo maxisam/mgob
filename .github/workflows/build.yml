@@ -99,7 +99,7 @@ jobs:
           docker run -d \
           --name mgob \
           --network "host" \
-          -e MONGO-TEST_AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
+          -e MONGO_TEST__AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}

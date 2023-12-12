@@ -206,7 +206,8 @@ func LoadPlans(dir string) ([]Plan, error) {
 func setupViperEnv(planName string) {
 	viper.SetConfigType("yaml")
 	// set upper case plan name as env prefix
-	viper.SetEnvPrefix(strings.ToUpper(planName))
+	envPrefix := strings.ReplaceAll(planName, "-", "_")
+	viper.SetEnvPrefix(envPrefix + "_") // will be uppercased automatically
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 }
