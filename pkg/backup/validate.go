@@ -19,7 +19,7 @@ import (
 func ValidateBackup(archive string, plan config.Plan, backupResult map[string]string) (bool, error) {
 	output, err := RunRestore(archive, plan)
 	if err != nil {
-		log.Error("Validation: Failed to execute restore command. restore failed, cleaning up")
+		log.WithField("plan", plan.Name).Error("Validation: Failed to execute restore command. restore failed, cleaning up")
 		return false, errors.Wrapf(err, "failed to execute restore command")
 	}
 	if err := CheckIfAnyFailure(string(output)); err != nil {
@@ -88,7 +88,7 @@ func checkRetoreDatabase(backupResult map[string]string, collectionNames []strin
 
 func RunRestore(archive string, plan config.Plan) ([]byte, error) {
 	restoreCmd := BuildRestoreCmd(archive, plan.Target, plan.Validation.Database)
-	log.Infof("Validation: restore backup with : %v", restoreCmd)
+	log.WithField("plan", plan.Name).Infof("Validation: restore backup with : %v", restoreCmd)
 	output, err := sh.Command("/bin/sh", "-c", restoreCmd).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if err != nil {
 		ex := ""
@@ -97,7 +97,7 @@ func RunRestore(archive string, plan config.Plan) ([]byte, error) {
 		}
 		return nil, errors.Wrapf(err, "mongorestore log %v", ex)
 	}
-	log.Debugf("restore output: %v", string(output))
+	log.WithField("plan", plan.Name).Debugf("restore output: %v", string(output))
 	return output, nil
 }
 

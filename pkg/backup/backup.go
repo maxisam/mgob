@@ -20,6 +20,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 
 	archive, mlog, err := dump(plan, tmpPath, t1.UTC())
 	log.WithFields(log.Fields{
+		"plan":    plan.Name,
 		"archive": archive,
 		"mlog":    mlog,
 		"err":     err,
