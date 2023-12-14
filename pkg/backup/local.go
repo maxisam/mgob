@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -144,16 +145,30 @@ func logToFile(file string, data []byte) error {
 }
 
 func applyRetention(path string, retention int) error {
-	gz := fmt.Sprintf("cd %v && rm -f $(ls -1t *.gz *.gz.encrypted | tail -n +%v)", path, retention+1)
-	err := sh.Command("/bin/sh", "-c", gz).Run()
-	if err != nil {
+	// Function to delete files based on retention policy
+	deleteFiles := func(pattern string) error {
+		files, err := filepath.Glob(filepath.Join(path, pattern))
+		if err != nil {
+			return err
+		}
+		sort.Sort(sort.Reverse(sort.StringSlice(files)))
+		if len(files) > retention {
+			for _, file := range files[retention:] {
+				if err := os.Remove(file); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	log.Debug("applying retention to *.gz* files")
+	if err := deleteFiles("*.gz*"); err != nil {
 		return errors.Wrapf(err, "removing old gz files from %v failed", path)
 	}
 
-	log.Debug("apply retention")
-	log := fmt.Sprintf("cd %v && rm -f $(ls -1t *.log | tail -n +%v)", path, retention+1)
-	err = sh.Command("/bin/sh", "-c", log).Run()
-	if err != nil {
+	log.Debug("applying retention to *.log files")
+	if err := deleteFiles("*.log"); err != nil {
 		return errors.Wrapf(err, "removing old log files from %v failed", path)
 	}
 
