@@ -15,9 +15,9 @@ import (
 func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig, backupPath string) (backup.Result, error) {
 	t1 := time.Now()
 
-	log.Debugf("Running restore for plan %v, backupPath %v", plan.Name, backupPath)
+	log.WithField("plan", plan.Name).Debugf("Running restore for plan %v, backupPath %v", plan.Name, backupPath)
 	restoreCmd := backup.BuildRestoreCmd(backupPath, plan.Target, plan.Target)
-	log.Infof("Running restore command with : %v", restoreCmd)
+	log.WithField("plan", plan.Name).Infof("Running restore command with : %v", restoreCmd)
 	fi, err := os.Stat(backupPath)
 
 	res := backup.Result{
@@ -32,18 +32,18 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig,
 	res.Size = fi.Size()
 	output, err := backup.RunRestore(backupPath, plan)
 	if err != nil || backup.CheckIfAnyFailure(string(output)) != nil {
-		log.Error("Restore failed")
+		log.WithField("plan", plan.Name).Error("Restore failed")
 		res.Duration = time.Since(t1)
 		return res, errors.Wrapf(err, "failed to execute restore command")
 	}
-	log.Debugf("Restore command output: %v", string(output))
+	log.WithField("plan", plan.Name).Debugf("Restore command output: %v", string(output))
 	res.Status = 200
 	res.Duration = time.Since(t1)
 	client, ctx, err := backup.GetMongoClient(backup.BuildUri(plan.Validation.Database))
 	if err == nil {
 		defer backup.Dispose(client, ctx)
 	} else {
-		log.Errorf("Failed to get mongo client: %v, depose skipped", err)
+		log.WithField("plan", plan.Name).Errorf("Failed to get mongo client: %v, depose skipped", err)
 	}
 	return res, nil
 }

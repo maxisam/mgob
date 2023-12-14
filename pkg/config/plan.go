@@ -190,7 +190,7 @@ func LoadPlans(dir string) ([]Plan, error) {
 				return nil, errors.Wrapf(err, "Marshaling %v failed", plan)
 			}
 
-			log.Debugf("Loaded plan %v, plan JSON: %s", plan.Name, planJSON)
+			log.WithField("plan", plan.Name).Debugf("Loaded plan %v, plan JSON: %s", plan.Name, planJSON)
 		}
 
 		plans = append(plans, plan)

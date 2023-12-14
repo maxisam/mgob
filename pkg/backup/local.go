@@ -29,7 +29,7 @@ func localBackup(file string, storagePath string, mlog string, plan config.Plan)
 	}
 	// check if log file exists, is not always created
 	if _, err := os.Stat(mlog); os.IsNotExist(err) {
-		log.Debug("appears no log file was generated")
+		log.WithField("plan", plan.Name).Debug("appears no log file was generated")
 	} else {
 		err = sh.Command("cp", mlog, planDir).Run()
 		if err != nil {
@@ -57,27 +57,38 @@ func dump(plan config.Plan, tmpPath string, ts time.Time) (string, string, error
 	dumpCmd := BuildDumpCmd(archive, plan.Target)
 	timeout := time.Duration(plan.Scheduler.Timeout) * time.Minute
 
-	log.Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
+	log.WithField("plan", plan.Name).Debugf("dump cmd: %v", strings.Replace(dumpCmd, fmt.Sprintf(`-p "%v"`, plan.Target.Password), "-p xxxx", -1))
 	output, retryCount, err := runDump(dumpCmd, plan.Retry, archive, retryCount, timeout)
 	if err != nil {
 		ex := ""
 		if len(output) > 0 {
 			ex = strings.Replace(string(output), "\n", " ", -1)
 		}
-		return "", "", errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
+		return archive, mlog, errors.Wrapf(err, "after %v retries, mongodump log %v", retryCount, ex)
 	}
 	if plan.Validation != nil {
 		backupResult := getDumpedDocMap(string(output))
-		if isValidate, err := ValidateBackup(archive, plan, backupResult); !isValidate || err != nil {
-			client, ctx, err := GetMongoClient(BuildUri(plan.Validation.Database))
-			if err != nil {
-				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to get mongo client for cleanup")
+		isValidate, validateErr := ValidateBackup(archive, plan, backupResult)
+		if !isValidate || validateErr != nil {
+			client, ctx, mongoErr := GetMongoClient(BuildUri(plan.Validation.Database))
+			if mongoErr != nil {
+				if validateErr != nil {
+					combinedError := fmt.Errorf("backup validation failed: %v; additionally, failed to get mongo client for cleanup: %v", validateErr, mongoErr)
+					return archive, mlog, combinedError
+				}
+				return archive, mlog, errors.Wrapf(mongoErr, "Failed to validate backup, failed to get mongo client for cleanup")
 			}
 			defer Dispose(client, ctx)
-			if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
-				return "", "", errors.Wrapf(err, "Failed to validate backup, failed to clean mongo validation database")
+			if cleanErr := cleanMongo(plan.Validation.Database.Database, client); cleanErr != nil {
+				if validateErr != nil {
+					combinedError := fmt.Errorf("backup validation failed: %v; additionally, failed to clean mongo validation database: %v", validateErr, cleanErr)
+					return archive, mlog, combinedError
+				}
+				return archive, mlog, errors.Wrapf(cleanErr, "Failed to validate backup, failed to clean mongo validation database")
 			}
-			return "", "", errors.Wrapf(err, "backup validation failed")
+			if validateErr != nil {
+				return archive, mlog, errors.Wrapf(validateErr, "backup validation failed")
+			}
 		}
 	}
 	logToFile(mlog, output)
