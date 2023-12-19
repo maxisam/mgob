@@ -25,7 +25,7 @@
 - Multiple Docker image releases catering to different backup solutions
 - Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
 - On-demand restore API
-- Load config from environment variables to override config file. syntax: `PLAN-ID_KEY_PROPERTY` (e.g. `mongo-test_SMTP_SERVER=smtp.company.com`)
+- Load config from environment variables to override config file. syntax: `PLAN_ID__KEY_PROPERTY` (e.g. `mongo_test__SMTP_SERVER=smtp.company.com`)
 
 ### Helm Chart
 
