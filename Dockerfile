@@ -46,7 +46,8 @@ ENV MONGODB_TOOLS_VERSION=$MONGODB_TOOLS_VERSION \
     MGOB_EN_GPG=$EN_GPG \
     MGOB_EN_MINIO=$EN_MINIO \
     MGOB_EN_RCLONE=$EN_RCLONE
-
+    
+RUN apk add --no-cache gnupg
 WORKDIR /
 
 COPY build.sh /tmp
