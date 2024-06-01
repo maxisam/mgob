@@ -53,7 +53,7 @@ helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
 
 ## Installation
 
-MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/repository/docker/maxisam/mgob).
+MGOB is available on Docker Hub at [maxisam/mgob](https://hub.docker.com/r/maxisam/mgob).
 
 Supported tags:
 
