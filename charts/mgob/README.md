@@ -29,7 +29,7 @@ Runs scheduled backups with retention, S3 & SFTP upload, notifications, instrume
 | logLevel | string | `"info"` |  |
 | image.registry | string | `"docker.io"` |  |
 | image.repository | string | `"maxisam/mgob"` |  |
-| image.tag | string | `"2.0.18-all"` |  |
+| image.tag | string | `"2.0.20-all"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.pullSecrets | list | `[]` |  |
 | envSecrets | object | `{"annotations":{},"secrets":{}}` | environment variables that will be created as secrets and passed to the container |
