@@ -11,7 +11,7 @@ sources:
 
 version: 2.1.0
 
-appVersion: "2.0.18"
+appVersion: "2.0.20"
 
 dependencies:
   - name: common
