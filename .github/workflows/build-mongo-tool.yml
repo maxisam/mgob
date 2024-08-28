@@ -14,7 +14,7 @@ jobs:
       VERSION: ""
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Read dockerfile and set env variables
         id: dockerfile
@@ -39,6 +39,6 @@ jobs:
           tags: maxisam/mongo-tool:${{ env.VERSION }}
           file: ./mongo-tool/Dockerfile
           push: true
-          platforms: linux/amd64
+          platforms: linux/arm64
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev,mode=max
