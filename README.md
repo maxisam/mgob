@@ -30,8 +30,8 @@
 ### Helm Chart
 
 ```bash
-helm pull oci://registry-1.docker.io/maxisam/mgob --version 1.8.3
-helm upgrade --install mgob maxisam/mgob --namespace mgob --create-namespace
+helm pull oci://registry-1.docker.io/maxisam/mgob --version 2.1.0
+helm upgrade <my-release> oci://registry-1.docker.io/maxisam/mgob --version <new-version>
 ```
 
 ### Breaking Changes
