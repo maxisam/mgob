@@ -59,6 +59,7 @@ s3:
 # GCloud upload (optional)
 gcloud:
   bucket: "backup"
+  # keyFilePath is optional if already authenticated, for example when using workload identity federation
   keyFilePath: /path/to/service-account.json
 # Azure blob storage upload (optional)
 azure:

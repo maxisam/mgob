@@ -2,6 +2,7 @@ package backup
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -12,17 +13,23 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
+func gCloudKeyFileAuth(keyFilePath string) error {
+	if _, err := os.Stat(keyFilePath); err != nil {
+		return err
+	}
+	register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v", keyFilePath)
+	if _, err := sh.Command("/bin/sh", "-c", register).CombinedOutput(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func gCloudUpload(file string, plan config.Plan) (string, error) {
 
 	if len(plan.GCloud.KeyFilePath) > 0 {
-		register := fmt.Sprintf("gcloud auth activate-service-account --key-file=%v",
-			plan.GCloud.KeyFilePath)
-		_, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
-		if err != nil {
+		if err := gCloudKeyFileAuth(plan.GCloud.KeyFilePath); err != nil {
 			return "", errors.Wrapf(err, "gcloud auth for plan %v failed", plan.Name)
 		}
-	} else {
-		return "", errors.Errorf("gcloud auth for plan %v failed, missing key file path", plan.Name)
 	}
 
 	fileName := filepath.Base(file)
