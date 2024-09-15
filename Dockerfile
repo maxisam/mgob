@@ -55,7 +55,7 @@ ENV PATH="/google-cloud-sdk/bin:${PATH}"
 COPY --from=mgob-builder /go/src/github.com/stefanprodan/mgob/mgob .
 COPY --from=tools-builder /go/mongo-tools/bin/* /usr/bin/
 
-VOLUME ["/config", "/storage", "/tmp", "/data"]
+VOLUME ["/storage", "/tmp", "/data"]
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="mgob" \
