@@ -2,10 +2,10 @@ package backup
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strings"
 	"time"
-	"net/url"
 
 	"github.com/codeskyblue/go-sh"
 	"github.com/pkg/errors"
@@ -89,6 +89,13 @@ func minioUpload(file string, plan config.Plan) (string, error) {
 		return "", errors.Wrapf(err, "mc config host for plan %v failed %s", plan.Name, output)
 	}
 
+	if plan.S3.CreateBucketIfNeeded {
+		err := minioCreateBucket(plan)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	fileName := filepath.Base(file)
 
 	upload := fmt.Sprintf("mc --quiet cp %v %v/%v/%v",
@@ -109,4 +116,31 @@ func minioUpload(file string, plan config.Plan) (string, error) {
 	}
 
 	return strings.Replace(output, "\n", " ", -1), nil
+}
+
+func minioCreateBucket(plan config.Plan) error {
+	listbucket := fmt.Sprintf("mc --quiet ls %v/%v", plan.Name, plan.S3.Bucket)
+
+	_, err := sh.Command("/bin/sh", "-c", listbucket).CombinedOutput()
+
+	if err == nil {
+		// nothing to do
+		return nil
+	}
+
+	// bucket does not seem to exist, try to create it
+	createbucket := fmt.Sprintf("mc --quiet mb %v/%v", plan.Name, plan.S3.Bucket)
+
+	result, err := sh.Command("/bin/sh", "-c", createbucket).CombinedOutput()
+
+	if err != nil {
+		output := ""
+		if len(result) > 0 {
+			output = strings.ReplaceAll(string(result), "\n", " ")
+		}
+
+		return errors.Wrapf(err, "S3 creation of bucket %v/%v failed %v", plan.Name, plan.S3.Bucket, output)
+	}
+
+	return nil
 }

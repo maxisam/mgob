@@ -65,13 +65,14 @@ type Gpg struct {
 }
 
 type S3 struct {
-	Bucket       string `yaml:"bucket"`
-	AccessKey    string `yaml:"accessKey"`
-	API          string `yaml:"api"`
-	SecretKey    string `yaml:"secretKey"`
-	URL          string `yaml:"url"`
-	KmsKeyId     string `yaml:"kmsKeyId"`
-	StorageClass string `yaml:"storageClass" validate:"omitempty,oneof=STANDARD REDUCED_REDUNDANCY STANDARD_IA ONE-ZONE_IA INTELLIGENT_TIERING GLACIER DEEP_ARCHIVE"`
+	Bucket               string `yaml:"bucket"`
+	AccessKey            string `yaml:"accessKey"`
+	API                  string `yaml:"api"`
+	SecretKey            string `yaml:"secretKey"`
+	URL                  string `yaml:"url"`
+	KmsKeyId             string `yaml:"kmsKeyId"`
+	StorageClass         string `yaml:"storageClass" validate:"omitempty,oneof=STANDARD REDUCED_REDUNDANCY STANDARD_IA ONE-ZONE_IA INTELLIGENT_TIERING GLACIER DEEP_ARCHIVE"`
+	CreateBucketIfNeeded bool   `yaml:"createbucketifneeded"`
 }
 
 type GCloud struct {
