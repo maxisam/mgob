@@ -1,5 +1,7 @@
 # Metrics
 
+This is only for schedule backup job.
+
 ## Successful backups counter
 
 ```bash
