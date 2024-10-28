@@ -56,6 +56,8 @@ s3:
   #storageClass: STANDARD
   # For Minio and AWS use S3v4 for GCP use S3v2
   api: "S3v4"
+  # optional, automatically create the bucket if it does not exist yet
+  #createbucketifneeded: false
 # GCloud upload (optional)
 gcloud:
   bucket: "backup"
