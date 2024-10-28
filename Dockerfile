@@ -11,9 +11,9 @@ ARG EN_MINIO=false
 ARG EN_RCLONE=false
 ARG VERSION
 
-FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} as tools-builder
+FROM maxisam/mongo-tool:${MONGODB_TOOLS_VERSION} AS tools-builder
 
-FROM golang:1.21 as mgob-builder
+FROM golang:1.21 AS mgob-builder
 ARG VERSION
 COPY . /go/src/github.com/stefanprodan/mgob
 WORKDIR /go/src/github.com/stefanprodan/mgob
