@@ -96,9 +96,9 @@ jobs:
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
-            EN_AWS_CLI=true
-            EN_AZURE=true
-            EN_GCLOUD=true
+            EN_AWS_CLI=false
+            EN_AZURE=false
+            EN_GCLOUD=false
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
