@@ -69,7 +69,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Mgob image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           build-args: |
             BUILD_DATE=${{ env.NOW }}
@@ -86,6 +86,7 @@ jobs:
           load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
+          no-cache: ${{ github.event_name != 'workflow_dispatch' }}
 
       - name: Setup key
         env:
