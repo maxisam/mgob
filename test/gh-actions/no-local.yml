@@ -10,7 +10,8 @@ retry:
 
 s3:
   url: "http://127.0.0.1:9000"
-  bucket: "backup"
+  bucket: "backup2"
   accessKey: "AKIAIOSFODNN7EXAMPLE"
   secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
   api: "S3v4"
+  createbucketifneeded: true
