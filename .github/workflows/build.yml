@@ -69,6 +69,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Mgob image
+        if: github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v6
         with:
           build-args: |
@@ -86,7 +87,25 @@ jobs:
           load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
-          no-cache: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - name: Build Mgob image for PR
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          build-args: |
+            BUILD_DATE=${{ env.NOW }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
+            EN_AWS_CLI=true
+            EN_AZURE=true
+            EN_GCLOUD=true
+            EN_MINIO=true
+            EN_RCLONE=true
+            EN_GPG=true
+          tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          push: false
+          load: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
 
       - name: Setup key
         env:
