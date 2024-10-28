@@ -108,6 +108,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
 
       - name: Setup key
+        if: github.event_name == 'workflow_dispatch'
         env:
           GCLOUD_KEY: ${{ secrets.GCLOUD_KEY }}
         run: |
@@ -125,7 +126,7 @@ jobs:
           -v ${{ github.workspace }}/test/backups:/storage \
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
 
-      - name: Verify mgob backup
+      - name: Verify mgob backup for PR
         run: |
           sleep 90
           echo '💥💥💥💥💥💥💥💥 Get mgob Version 💥💥💥💥💥💥💥💥💥💥'
@@ -155,6 +156,18 @@ jobs:
               echo "There are files in the directory."
               exit 1
           fi
+          # verify for sftp
+          if ! grep -q "SFTP upload finished" logs.txt; then
+            echo "SFTP integration test failed"
+            exit 1
+          fi
+
+      - name: Verify mgob cloud backup
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          logs=$(docker logs mgob 2>&1)
+          echo "$logs" | tee logs.txt
+          echo '💥💥💥💥💥💥💥💥 verify mgob backup 💥💥💥💥💥💥💥💥💥💥'
           # verify for gcloud
           if ! grep -q "GCloud upload finished Copying" logs.txt; then
             echo "GCloud integration test failed"
@@ -165,11 +178,7 @@ jobs:
           #   echo "Azure integration test failed, check if the connection string is expired"
           #   exit 1
           # fi
-          # verify for sftp
-          if ! grep -q "SFTP upload finished" logs.txt; then
-            echo "SFTP integration test failed"
-            exit 1
-          fi
+
       - name: Upload file as artifact
         uses: actions/upload-artifact@v3
         with:
@@ -185,6 +194,7 @@ jobs:
         with:
           name: metrics
           path: metrics.txt
+
       - name: Verify mgob restore
         run: |
           echo 'Restore integration test'
