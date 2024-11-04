@@ -27,7 +27,7 @@ jobs:
           MINIO_ROOT_PASSWORD: ${{ env.MINIO_ROOT_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup MongoDB
         run: yarn && node client.js
@@ -55,6 +55,9 @@ jobs:
               atmoz/sftp:alpine \
               mgob:secret:1001::upload
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -72,7 +75,9 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           build-args: |
+            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
@@ -83,8 +88,7 @@ jobs:
             EN_RCLONE=true
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          push: false
-          load: true
+          push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
 
@@ -92,7 +96,9 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           build-args: |
+            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
@@ -103,8 +109,7 @@ jobs:
             EN_RCLONE=true
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          push: false
-          load: true
+          push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
 
       - name: Setup key
@@ -132,6 +137,41 @@ jobs:
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
           ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+
+      - name: Verify Mgob container is running
+        run: |
+          if [ "$(docker inspect -f '{{.State.Status}}' mgob)" != "running" ]; then
+            echo "Mgob container is not running!"
+            docker logs mgob
+            exit 1
+          fi
+          echo "Mgob container is running."
+
+      - name: Check Mgob container logs for startup errors
+        run: |
+          if docker logs mgob 2>&1 | grep -iq "error"; then
+            echo "Error found in Mgob startup logs!"
+            docker logs mgob
+            exit 1
+          fi
+          echo "No errors in Mgob startup logs."
+
+      - name: Wait for Mgob service to be ready
+        run: |
+          echo 'Waiting for Mgob to be ready...'
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8090/version -o /dev/null; then
+              echo "Mgob is ready!"
+              break
+            elif [ "$i" -eq "10" ]; then
+              echo "Mgob not ready after multiple attempts."
+              docker logs mgob
+              exit 1
+            fi
+            echo "Waiting for Mgob... retrying in 5 seconds"
+            sleep 5
+          done
+          echo 'Mgob service is available.'
 
       - name: Verify mgob backup for PR
         run: |
@@ -243,9 +283,11 @@ jobs:
 
       - name: Push mgob image
         if: github.event_name == 'workflow_dispatch'
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           build-args: |
+            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}

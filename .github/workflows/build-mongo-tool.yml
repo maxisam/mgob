@@ -39,6 +39,6 @@ jobs:
           tags: maxisam/mongo-tool:${{ env.VERSION }}
           file: ./mongo-tool/Dockerfile
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev,mode=max
