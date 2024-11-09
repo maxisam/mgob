@@ -4,8 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     branches: ["main"]
-    paths:
-      - "!.github/workflows/*.yml"
+    paths-ignore:
+      - ".github/workflows/*.yml"
+      - "**/*.md"
+      - ".vscode/*"
 
 jobs:
   dev-build:
