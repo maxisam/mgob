@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ""
+      DOCKER_REPOSITORY: ${{ vars.DOCKER_REPOSITORY || github.repository_owner }}
 
     steps:
       - uses: actions/checkout@v4
@@ -36,9 +37,9 @@ jobs:
       - name: Build Mongo Tool image
         uses: docker/build-push-action@v6
         with:
-          tags: maxisam/mongo-tool:${{ env.VERSION }}
+          tags: ${{ env.DOCKER_REPOSITORY }}/mongo-tool:${{ env.VERSION }}
           file: ./mongo-tool/Dockerfile
           push: true
-          platforms: linux/amd64
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mongo-tool:buildcache-dev,mode=max
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=${{ env.DOCKER_REPOSITORY }}/mongo-tool:buildcache-dev
+          cache-to: type=registry,ref=${{ env.DOCKER_REPOSITORY }}/mongo-tool:buildcache-dev,mode=max
