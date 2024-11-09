@@ -79,9 +79,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           build-args: |
-            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
@@ -101,9 +100,8 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           build-args: |
-            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ env.APP_VERSION }}.${{ github.run_number }}
