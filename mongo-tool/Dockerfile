@@ -1,4 +1,3 @@
-# Use a specific version of the Go Alpine image
 FROM golang:1.22.8-alpine3.20 AS builder
 
 # Build arguments
