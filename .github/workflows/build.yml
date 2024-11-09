@@ -92,7 +92,8 @@ jobs:
             EN_RCLONE=true
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          push: true
+          push: false
+          load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
 
@@ -113,7 +114,8 @@ jobs:
             EN_RCLONE=true
             EN_GPG=true
           tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
-          push: true
+          push: false
+          load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
 
       - name: Setup key
