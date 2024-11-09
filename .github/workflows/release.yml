@@ -63,7 +63,9 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: |
             ${{ github.repository }}:${{ needs.set-build-env.outputs.buildId }}-${{ matrix.feature }}
+          platforms: linux/amd64,linux/arm64
           build-args: |
+            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ needs.set-build-env.outputs.now }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ needs.set-build-env.outputs.buildId }}
@@ -101,7 +103,9 @@ jobs:
             ${{ github.repository }}:${{ needs.set-build-env.outputs.buildId }}-all
             ${{ github.repository }}:${{ needs.set-build-env.outputs.buildId }}
             ${{ github.repository }}:latest
+          platforms: linux/amd64,linux/arm64
           build-args: |
+            BUILDKIT_MULTI_PLATFORM=1
             BUILD_DATE=${{ env.NOW }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ needs.set-build-env.outputs.buildId }}
