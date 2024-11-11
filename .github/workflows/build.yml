@@ -13,7 +13,8 @@ jobs:
   dev-build:
     runs-on: ubuntu-latest
     env:
-      APP_VERSION: dev
+      APP_VERSION: ${{ vars.APP_VERSION || 'dev' }}
+      DOCKER_REPOSITORY: ${{ vars.DOCKER_REPOSITORY || github.repository_owner }}
       MINIO_ROOT_USER: AKIAIOSFODNN7EXAMPLE
       MINIO_ROOT_PASSWORD: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
     services:
@@ -90,7 +91,7 @@ jobs:
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
-          tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          tags: ${{ env.DOCKER_REPOSITORY }}/mgob:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
@@ -111,7 +112,7 @@ jobs:
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
-          tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          tags: ${{ env.DOCKER_REPOSITORY }}/mgob:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: false
           load: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
@@ -140,7 +141,7 @@ jobs:
           -e MONGO_TEST__AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
-          ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          ${{ env.DOCKER_REPOSITORY }}:${{ env.APP_VERSION }}.${{ github.run_number }}
 
       - name: Verify Mgob container is running
         run: |
@@ -301,7 +302,7 @@ jobs:
             EN_MINIO=true
             EN_RCLONE=true
             EN_GPG=true
-          tags: ${{ github.repository }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          tags: ${{ env.DOCKER_REPOSITORY }}/mgob:${{ env.APP_VERSION }}.${{ github.run_number }}
           push: true
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/mgob:buildcache-dev,mode=max
