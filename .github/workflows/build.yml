@@ -67,7 +67,11 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set current date as env variable
-        run: echo "NOW=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+        env:
+          DOCKER_REPOSITORY: ${{ env.DOCKER_REPOSITORY }}
+        run: |
+          echo "NOW=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> ${GITHUB_ENV}
+          echo "DOCKER_REPOSITORY : $DOCKER_REPOSITORY"
 
       - name: Login to DockerHub
         if: github.event_name == 'workflow_dispatch'
@@ -141,7 +145,7 @@ jobs:
           -e MONGO_TEST__AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
-          ${{ env.DOCKER_REPOSITORY }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          ${{ env.DOCKER_REPOSITORY }}/mgob:${{ env.APP_VERSION }}.${{ github.run_number }}
 
       - name: Verify Mgob container is running
         run: |
