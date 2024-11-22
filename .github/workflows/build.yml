@@ -67,7 +67,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set current date as env variable
-        run: echo "NOW=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
+        run: |
+          echo "NOW=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> ${GITHUB_ENV}
+          echo "${{ env.DOCKER_REPOSITORY}}" 
 
       - name: Login to DockerHub
         if: github.event_name == 'workflow_dispatch'
