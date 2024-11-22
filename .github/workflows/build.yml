@@ -145,7 +145,7 @@ jobs:
           -e MONGO_TEST__AZURE_CONNECTIONSTRING="$AZURE_CONNECTIONSTRING" \
           -v ${{ github.workspace }}/test/gh-actions:/config \
           -v ${{ github.workspace }}/test/backups:/storage \
-          ${{ env.DOCKER_REPOSITORY }}:${{ env.APP_VERSION }}.${{ github.run_number }}
+          ${{ env.DOCKER_REPOSITORY }}/mgob:${{ env.APP_VERSION }}.${{ github.run_number }}
 
       - name: Verify Mgob container is running
         run: |
