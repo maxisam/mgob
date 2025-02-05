@@ -41,7 +41,9 @@ func TestLoadPlans(t *testing.T) {
 	// set env var for test
 	testConnectionString := "test-connetion-string"
 	testPlanName := "mongo-test"
-	os.Setenv(fmt.Sprintf("%s__%s_%s", strings.ToUpper(strings.Replace(testPlanName, "-", "_", -1)), "AZURE", "CONNECTIONSTRING"), testConnectionString)
+	targetPassword := "test-password"
+	os.Setenv(fmt.Sprintf("%s__%s_%s", strings.ToUpper(strings.ReplaceAll(testPlanName, "-", "_")), "AZURE", "CONNECTIONSTRING"), testConnectionString)
+	os.Setenv(fmt.Sprintf("%s__%s_%s", strings.ToUpper(strings.ReplaceAll(testPlanName, "-", "_")), "TARGET", "PASSWORD"), targetPassword)
 	dir := getDir(t)
 
 	plans, err := LoadPlans(dir)
@@ -56,6 +58,9 @@ func TestLoadPlans(t *testing.T) {
 	// verify plan.name = mongo-test has a azure connection string set as test-connetion-string
 	for _, plan := range plans {
 		if plan.Name == testPlanName {
+			if plan.Target.Password != targetPassword {
+				t.Errorf("LoadPlans(%q) returned plan with wrong target password: got %q, want %q", dir, plan.Target.Password, targetPassword)
+			}
 			if plan.Azure.ConnectionString != testConnectionString {
 				t.Errorf("LoadPlans(%q) returned plan with wrong azure connection string: got %q, want %q", dir, plan.Azure.ConnectionString, "test-connetion-string")
 			}
