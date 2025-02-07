@@ -1,5 +1,5 @@
 # Define build arguments with default values
-ARG MONGODB_TOOLS_VERSION=100.8.0
+ARG MONGODB_TOOLS_VERSION=100.11.0
 ARG EN_AWS_CLI=false
 ARG AWS_CLI_VERSION=1.29.44
 ARG EN_AZURE=false
