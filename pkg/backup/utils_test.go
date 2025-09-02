@@ -20,10 +20,11 @@ func Test_BuildRestoreCmd_Different_Name(t *testing.T) {
 		Host:     "localhost",
 		Port:     27017,
 		Database: "test-restore",
+		Params:   "--bypassDocumentValidation",
 	}
 
 	dumpCmd := BuildRestoreCmd("test.gz", target, restore)
-	assert.Equal(t, dumpCmd, `mongorestore --archive=test.gz --gzip --host localhost --port 27017 --nsInclude test.* --nsFrom test.* --nsTo test-restore.* `)
+	assert.Equal(t, dumpCmd, `mongorestore --archive=test.gz --gzip --host localhost --port 27017 --nsInclude test.* --bypassDocumentValidation --nsFrom test.* --nsTo test-restore.* `)
 }
 
 func Test_BuildRestoreCmd_Same_Name(t *testing.T) {
@@ -39,10 +40,11 @@ func Test_BuildRestoreCmd_Same_Name(t *testing.T) {
 		Host:     "localhost",
 		Port:     27017,
 		Database: "test",
+		Params:   "--bypassDocumentValidation",
 	}
 
 	dumpCmd := BuildRestoreCmd("test.gz", target, restore)
-	assert.Equal(t, dumpCmd, `mongorestore --archive=test.gz --gzip --host localhost --port 27017 --nsInclude test.* `)
+	assert.Equal(t, dumpCmd, `mongorestore --archive=test.gz --gzip --host localhost --port 27017 --nsInclude test.* --bypassDocumentValidation `)
 }
 
 func Test_BuildDumpCmd_no_uri(t *testing.T) {

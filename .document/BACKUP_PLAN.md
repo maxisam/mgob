@@ -26,6 +26,7 @@ validation:
     port: 27017
     noGzip: false
     database: test_restore # Database name for restore operation
+    params: "--bypassDocumentValidation" # Additional mongorestore params, leave blank if not needed
 # Encryption (optional)
 encryption:
   # At the time being, only gpg asymmetric encryption is supported
