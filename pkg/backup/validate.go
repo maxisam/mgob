@@ -30,11 +30,11 @@ func ValidateBackup(archive string, plan config.Plan, backupResult map[string]st
 		return false, errors.Wrapf(err, "failed to get mongo client")
 	}
 	defer Dispose(client, ctx)
-	collectionNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
+	collectionNames, viewNames, err := getRestoreCollectionNames(plan.Validation.Database.Database, client)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get collection names")
 	}
-	if err = checkRetoreDatabase(backupResult, collectionNames); err != nil {
+	if err = checkRetoreDatabase(backupResult, collectionNames, viewNames); err != nil {
 		return false, errors.Wrapf(err, "failed to run validation check against restore database")
 	}
 	if err = cleanMongo(plan.Validation.Database.Database, client); err != nil {
@@ -62,27 +62,61 @@ func Dispose(client *mongo.Client, ctx context.Context) {
 	}
 }
 
-func getRestoreCollectionNames(databaseName string, client *mongo.Client) ([]string, error) {
+func getRestoreCollectionNames(databaseName string, client *mongo.Client) ([]string, map[string]struct{}, error) {
 	collectionNames, err := client.Database(databaseName).ListCollectionNames(context.TODO(), bson.M{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get collection names in database %v", databaseName)
+		return nil, nil, errors.Wrapf(err, "failed to get collection names in database %v", databaseName)
 	}
 	log.Infof("Validation: collection names %v", strings.Join(collectionNames, ","))
-	return collectionNames, nil
+	viewNames, err := client.Database(databaseName).ListCollectionNames(context.TODO(), bson.M{"type": "view"})
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to get view names in database %v", databaseName)
+	}
+	viewMap := make(map[string]struct{}, len(viewNames))
+	if len(viewNames) > 0 {
+		log.Infof("Validation: view names %v", strings.Join(viewNames, ","))
+	}
+	for _, viewName := range viewNames {
+		viewMap[viewName] = struct{}{}
+	}
+	return collectionNames, viewMap, nil
 }
 
-func checkRetoreDatabase(backupResult map[string]string, collectionNames []string) error {
-	checkCount := 0
+func checkRetoreDatabase(backupResult map[string]string, collectionNames []string, viewNames map[string]struct{}) error {
+	skipCollections := map[string]struct{}{
+		"system.views": {},
+	}
+	for viewName := range viewNames {
+		skipCollections[viewName] = struct{}{}
+	}
+
+	restoredCollections := make(map[string]struct{})
 	for _, collectionName := range collectionNames {
-		if _, ok := backupResult[collectionName]; ok {
-			checkCount++
-		} else {
+		if _, skip := skipCollections[collectionName]; skip {
+			log.Debugf("Validation: skipping view collection %v during restore check", collectionName)
+			continue
+		}
+		restoredCollections[collectionName] = struct{}{}
+		if _, ok := backupResult[collectionName]; !ok {
 			return errors.New(fmt.Sprintf("Collection %v not found in backup", collectionName))
 		}
 	}
-	if checkCount != len(backupResult) {
-		return errors.New(fmt.Sprintf("Backup collection count: %v and restore collection count: %v are not the same", len(backupResult), checkCount))
+
+	backupCollections := make(map[string]struct{})
+	for collectionName := range backupResult {
+		if _, skip := skipCollections[collectionName]; skip {
+			continue
+		}
+		backupCollections[collectionName] = struct{}{}
+		if _, ok := restoredCollections[collectionName]; !ok {
+			return errors.New(fmt.Sprintf("Collection %v from backup not found in restored database", collectionName))
+		}
 	}
+
+	if len(restoredCollections) != len(backupCollections) {
+		return errors.New(fmt.Sprintf("Backup collection count: %v and restore collection count: %v are not the same", len(backupCollections), len(restoredCollections)))
+	}
+
 	return nil
 }
 
