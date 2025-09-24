@@ -77,7 +77,8 @@ func awsUpload(file string, plan config.Plan) (string, error) {
 
 func minioUpload(file string, plan config.Plan) (string, error) {
 
-	register := fmt.Sprintf("mc config host add %v %v %v %v --api %v",
+	// Try the new mc alias set command first
+	register := fmt.Sprintf("mc alias set %v %v %v %v --api %v",
 		plan.Name, plan.S3.URL, plan.S3.AccessKey, plan.S3.SecretKey, plan.S3.API)
 
 	result, err := sh.Command("/bin/sh", "-c", register).CombinedOutput()
@@ -85,8 +86,19 @@ func minioUpload(file string, plan config.Plan) (string, error) {
 	if len(result) > 0 {
 		output = strings.Replace(string(result), "\n", " ", -1)
 	}
+
+	// If the new command fails, fallback to the old mc config host add
 	if err != nil {
-		return "", errors.Wrapf(err, "mc config host for plan %v failed %s", plan.Name, output)
+		registerFallback := fmt.Sprintf("mc config host add %v %v %v %v --api %v",
+			plan.Name, plan.S3.URL, plan.S3.AccessKey, plan.S3.SecretKey, plan.S3.API)
+
+		result, err = sh.Command("/bin/sh", "-c", registerFallback).CombinedOutput()
+		if len(result) > 0 {
+			output = strings.Replace(string(result), "\n", " ", -1)
+		}
+		if err != nil {
+			return "", errors.Wrapf(err, "mc alias set and mc config host add both failed for plan %v: %s", plan.Name, output)
+		}
 	}
 
 	if plan.S3.CreateBucketIfNeeded {
