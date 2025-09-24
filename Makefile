@@ -127,7 +127,7 @@ backend:
 	    -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
 	    -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
 	    minio/minio server /export
-	@mc config host add local http://localhost:20099 \
+	@mc alias set local http://localhost:20099 \
 	    AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY --api S3v4
 	@sleep 5
 	@mc mb local/backup
