@@ -24,6 +24,7 @@
 - New Helm Chart with enhanced metrics, liveness probe, and other features
 - Multiple Docker image releases catering to different backup solutions
 - Option to skip local backup when retention is set to 0 ([#42](https://github.com/maxisam/mgob/pull/42), Credit: @aneagoe)
+- Optional S3 sync mode to mirror the retained local backups to object storage
 - On-demand restore API
 - Load config from environment variables to override config file. syntax: `PLAN_ID__KEY_PROPERTY` (e.g. `mongo_test__SMTP_SERVER=smtp.company.com`)
 

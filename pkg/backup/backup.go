@@ -57,6 +57,11 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 		}
 	}
 
+	planDir := ""
+	if conf.StoragePath != "" {
+		planDir = filepath.Join(conf.StoragePath, plan.Name)
+	}
+
 	if conf.StoragePath != "" && plan.Scheduler.Retention != 0 {
 		localBackupOutput, err := localBackup(file, conf.StoragePath, mlog, plan)
 		if err != nil {
@@ -76,7 +81,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 	}
 
 	if plan.S3 != nil {
-		s3Output, err := s3Upload(file, plan, conf.UseAwsCli)
+		s3Output, err := s3Upload(file, plan, conf.UseAwsCli, planDir)
 		if err != nil {
 			return res, err
 		} else {

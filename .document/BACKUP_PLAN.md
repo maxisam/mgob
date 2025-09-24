@@ -45,6 +45,8 @@ s3:
   # accessKey and secretKey are optional for AWS, if your Docker image has awscli
   accessKey: "Q3AM3UQ867SPQQA43P2F"
   secretKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  # When true, mirror the plan's local storage directory to the bucket (requires storage_path and retention > 0)
+  sync: false
   # Optional, only used for AWS (when awscli is present)
   # The customer-managed AWS Key Management  Service (KMS) key ID that should be used to
   # server-side encrypt the backup in S3
