@@ -43,7 +43,7 @@ jobs:
           sleep 10
           sudo curl -s -o /usr/bin/mc https://dl.minio.io/client/mc/release/linux-amd64/mc
           sudo chmod u+x /usr/bin/mc
-          sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
+          sudo mc alias set local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
 
       - name: Setup SFTP
@@ -131,8 +131,8 @@ jobs:
       - name: Install yq and remove gcloud section if event is pull_request
         if: github.event_name == 'pull_request'
         run: |
-          sudo add-apt-repository ppa:rmescandon/yq -y
-          sudo apt-get install -y yq
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           yq eval 'del(.gcloud)' -i test/gh-actions/mongo-test.yml
 
       - name: Run Mgob image
