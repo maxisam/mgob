@@ -44,8 +44,9 @@ func Test_checkRetoreDatabase(t *testing.T) {
 		"test2": "1",
 	}
 	collectionNames := []string{"test", "test2"}
+	viewNames := map[string]struct{}{}
 
-	assert.NoError(t, checkRetoreDatabase(backupResult, collectionNames))
+	assert.NoError(t, checkRetoreDatabase(backupResult, collectionNames, viewNames))
 }
 
 func Test_checkRetoreDatabase_Missing_In_Restore(t *testing.T) {
@@ -54,8 +55,9 @@ func Test_checkRetoreDatabase_Missing_In_Restore(t *testing.T) {
 		"test2": "1",
 	}
 	collectionNames := []string{"test"}
+	viewNames := map[string]struct{}{}
 
-	assert.Error(t, checkRetoreDatabase(backupResult, collectionNames))
+	assert.Error(t, checkRetoreDatabase(backupResult, collectionNames, viewNames))
 }
 
 func Test_checkRetoreDatabase_Mismatch_In_Restore(t *testing.T) {
@@ -64,6 +66,19 @@ func Test_checkRetoreDatabase_Mismatch_In_Restore(t *testing.T) {
 		"test2": "1",
 	}
 	collectionNames := []string{"test2"}
+	viewNames := map[string]struct{}{}
 
-	assert.Error(t, checkRetoreDatabase(backupResult, collectionNames))
+	assert.Error(t, checkRetoreDatabase(backupResult, collectionNames, viewNames))
+}
+
+func Test_checkRetoreDatabase_Skip_Views(t *testing.T) {
+	backupResult := map[string]string{
+		"system.buckets.datapoints": "1",
+	}
+	collectionNames := []string{"system.buckets.datapoints", "datapoints", "system.views"}
+	viewNames := map[string]struct{}{
+		"datapoints": {},
+	}
+
+	assert.NoError(t, checkRetoreDatabase(backupResult, collectionNames, viewNames))
 }
