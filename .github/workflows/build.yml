@@ -218,6 +218,13 @@ jobs:
             exit 1
           fi
 
+      - name: Verify MinIO mirror sync
+        run: |
+          if ! grep -q "mirror --remove" logs.txt; then
+            echo "MinIO mirror sync verification failed"
+            exit 1
+          fi          
+
       - name: Verify mgob cloud backup
         if: github.event_name == 'workflow_dispatch'
         run: |
