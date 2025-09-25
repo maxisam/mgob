@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -19,6 +20,12 @@ func postBackup(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value("app.config").(config.AppConfig)
 	modules := r.Context().Value("app.modules").(config.ModuleConfig)
 	planID := chi.URLParam(r, "planID")
+	// Validate planID is a safe file name (single component, no traversal or separators)
+	if strings.Contains(planID, "/") || strings.Contains(planID, "\\") || strings.Contains(planID, "..") || planID == "" {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Invalid plan name"})
+		return
+	}
 	plan, err := config.LoadPlan(cfg.ConfigPath, planID)
 	if err != nil {
 		render.Status(r, 500)
