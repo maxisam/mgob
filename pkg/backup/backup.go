@@ -76,7 +76,7 @@ func Run(plan config.Plan, conf *config.AppConfig, modules *config.ModuleConfig)
 	}
 
 	if plan.S3 != nil {
-		s3Output, err := s3Upload(file, plan, conf.UseAwsCli)
+		s3Output, err := s3Upload(file, plan, conf.UseAwsCli, conf.StoragePath)
 		if err != nil {
 			return res, err
 		} else {

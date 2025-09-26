@@ -3,6 +3,7 @@ package backup
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/stefanprodan/mgob/pkg/config"
 )
 
-func s3Upload(file string, plan config.Plan, useAwsCli bool) (string, error) {
+func s3Upload(file string, plan config.Plan, useAwsCli bool, storagePath string) (string, error) {
 
 	s3Url, err := url.Parse(plan.S3.URL)
 
@@ -25,7 +26,7 @@ func s3Upload(file string, plan config.Plan, useAwsCli bool) (string, error) {
 		return awsUpload(file, plan)
 	}
 
-	return minioUpload(file, plan)
+	return minioUpload(file, plan, storagePath)
 }
 
 func awsUpload(file string, plan config.Plan) (string, error) {
@@ -75,7 +76,7 @@ func awsUpload(file string, plan config.Plan) (string, error) {
 	return strings.Replace(output, "\n", " ", -1), nil
 }
 
-func minioUpload(file string, plan config.Plan) (string, error) {
+func minioUpload(file string, plan config.Plan, storagePath string) (string, error) {
 
 	// Try the new mc alias set command first
 	register := fmt.Sprintf("mc alias set %v %v %v %v --api %v",
@@ -108,6 +109,14 @@ func minioUpload(file string, plan config.Plan) (string, error) {
 		}
 	}
 
+	if plan.S3.Sync {
+		syncOutput, err := minioMirror(plan, storagePath, time.Duration(plan.Scheduler.Timeout)*time.Minute)
+		if err != nil {
+			return "", err
+		}
+		return syncOutput, nil
+	}
+
 	fileName := filepath.Base(file)
 
 	upload := fmt.Sprintf("mc --quiet cp %v %v/%v/%v",
@@ -128,6 +137,40 @@ func minioUpload(file string, plan config.Plan) (string, error) {
 	}
 
 	return strings.Replace(output, "\n", " ", -1), nil
+}
+
+func minioMirror(plan config.Plan, storagePath string, timeout time.Duration) (string, error) {
+	if storagePath == "" {
+		return "", errors.Errorf("S3 sync requested but storage path is empty for plan %v", plan.Name)
+	}
+
+	planDir := filepath.Join(storagePath, plan.Name)
+	if _, err := os.Stat(planDir); err != nil {
+		return "", errors.Wrapf(err, "S3 sync failed, could not access plan directory %v", planDir)
+	}
+
+	mirrorCmd := fmt.Sprintf("mc --quiet mirror --remove %v %v/%v", planDir, plan.Name, plan.S3.Bucket)
+
+	result, err := sh.Command("/bin/sh", "-c", mirrorCmd).SetTimeout(timeout).CombinedOutput()
+	output := ""
+	if len(result) > 0 {
+		output = strings.Replace(string(result), "\n", " ", -1)
+	}
+
+	message := fmt.Sprintf("mirror --remove %v %v/%v", planDir, plan.Name, plan.S3.Bucket)
+	if output != "" {
+		message = fmt.Sprintf("%s %s", message, output)
+	}
+
+	if err != nil {
+		return "", errors.Wrapf(err, "S3 syncing %v to %v/%v failed %v", planDir, plan.Name, plan.S3.Bucket, output)
+	}
+
+	if strings.Contains(output, "<ERROR>") {
+		return "", errors.Errorf("S3 sync failed %v", output)
+	}
+
+	return message, nil
 }
 
 func minioCreateBucket(plan config.Plan) error {
