@@ -54,6 +54,9 @@ s3:
   #     ZONE_IA  |  INTELLIGENT_TIERING  |  GLACIER | DEEP_ARCHIVE.
   # Defaults to 'STANDARD'
   #storageClass: STANDARD
+  # When true, use `mc mirror --remove` to keep the bucket in sync with the local plan directory.
+  # Requires a configured storagePath and scheduler retention greater than zero so the plan directory exists.
+  sync: false
   # For Minio and AWS use S3v4 for GCP use S3v2
   api: "S3v4"
   # optional, automatically create the bucket if it does not exist yet
@@ -109,6 +112,10 @@ team:
   warnOnly: false
   themeColor: "#f6c344"
 ```
+
+### S3 sync mode
+
+Setting `s3.sync: true` switches the upload behavior from individual `mc cp` commands to `mc mirror --remove`, keeping the remote bucket aligned with the plan's local storage directory. To avoid mirror failures, ensure the mgob application is configured with a `storagePath` and that `scheduler.retention` remains greater than zero so the directory exists when the mirror runs.
 
 ## Database connection (target)
 

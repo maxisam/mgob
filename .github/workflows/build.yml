@@ -45,6 +45,8 @@ jobs:
           sudo chmod u+x /usr/bin/mc
           sudo mc config host add local http://127.0.0.1:9000 ${{ env.MINIO_ROOT_USER }} ${{ env.MINIO_ROOT_PASSWORD }} --api S3v4
           sudo mc mb local/backup
+          echo 'mirror-sentinel' | sudo tee /tmp/minio-sentinel >/dev/null
+          sudo mc cp /tmp/minio-sentinel local/backup/mirror-sentinel.txt
 
       - name: Setup SFTP
         run: |
@@ -217,6 +219,15 @@ jobs:
             echo "SFTP integration test failed"
             exit 1
           fi
+
+      - name: Verify MinIO mirror sync
+        run: |
+          if sudo mc ls local/backup | grep -q "mirror-sentinel.txt"; then
+            echo "MinIO mirror sync verification failed: sentinel object still present"
+            sudo mc ls local/backup
+            exit 1
+          fi
+          echo "MinIO mirror sync removed sentinel object."
 
       - name: Verify mgob cloud backup
         if: github.event_name == 'workflow_dispatch'
