@@ -580,3 +580,7 @@ mongodb:
     requests:
       cpu: 200m
       memory: 300Mi
+
+# busybox is being used for the init container
+busybox:
+  image: busybox:1.34

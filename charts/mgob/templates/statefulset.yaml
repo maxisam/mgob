@@ -143,7 +143,7 @@ spec:
       {{- end }}
       initContainers:
         - name: init-cleanup
-          image: busybox:1.34
+          image: {{ .Values.busybox.image }}
           command: ['sh', '-c', 'find /tmp -not -name "mgob.db" -type f -delete']
           volumeMounts:
           - mountPath: /tmp
