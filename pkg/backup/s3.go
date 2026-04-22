@@ -31,18 +31,14 @@ func s3Upload(file string, plan config.Plan, useAwsCli bool) (string, error) {
 func awsUpload(file string, plan config.Plan) (string, error) {
 
 	output := ""
+	configure := ""
 	if len(plan.S3.AccessKey) > 0 && len(plan.S3.SecretKey) > 0 {
 		// Let's use credentials given
-		configure := fmt.Sprintf("aws configure set aws_access_key_id %v && aws configure set aws_secret_access_key %v",
-			plan.S3.AccessKey, plan.S3.SecretKey)
-
-		result, err := sh.Command("/bin/sh", "-c", configure).CombinedOutput()
-		if len(result) > 0 {
-			output += strings.Replace(string(result), "\n", " ", -1)
-		}
-		if err != nil {
-			return "", errors.Wrapf(err, "aws configure for plan %v failed %s", plan.Name, output)
-		}
+		configure = fmt.Sprintf(
+			"AWS_ACCESS_KEY_ID='%v' AWS_SECRET_ACCESS_KEY='%v' ",
+			plan.S3.AccessKey,
+			plan.S3.SecretKey,
+		)
 	}
 
 	fileName := filepath.Base(file)
@@ -57,8 +53,8 @@ func awsUpload(file string, plan config.Plan) (string, error) {
 		storage = fmt.Sprintf(" --storage-class %v", plan.S3.StorageClass)
 	}
 
-	upload := fmt.Sprintf("aws --quiet s3 cp %v s3://%v/%v%v%v",
-		file, plan.S3.Bucket, fileName, encrypt, storage)
+	upload := fmt.Sprintf("%vaws --quiet s3 cp %v s3://%v/%v%v%v",
+		configure, file, plan.S3.Bucket, fileName, encrypt, storage)
 
 	result, err := sh.Command("/bin/sh", "-c", upload).SetTimeout(time.Duration(plan.Scheduler.Timeout) * time.Minute).CombinedOutput()
 	if len(result) > 0 {
